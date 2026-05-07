@@ -616,8 +616,8 @@ function selectPractice(id) {
   patients   = [];
   expandedId = null;
 
-  document.getElementById("practice-picker").hidden = true;
-  document.getElementById("app-shell").hidden = false;
+  document.getElementById("practice-picker").style.display = "none";
+  document.getElementById("app-shell").style.display = "";
   document.getElementById("sheet-link").href  = activePractice.responsesUrl;
 
   const logo = document.getElementById("practice-logo");
@@ -635,8 +635,8 @@ function showPicker() {
   activePractice = null;
   patients       = [];
   expandedId     = null;
-  document.getElementById("app-shell").hidden     = true;
-  document.getElementById("practice-picker").hidden = false;
+  document.getElementById("app-shell").style.display      = "none";
+  document.getElementById("practice-picker").style.display = "";
 }
 
 // ═══════════════════════════════════════════════════════════════════
