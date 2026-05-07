@@ -197,7 +197,7 @@
     label: PRACTICE_LABEL,
     displayName: "Ulrike Sujansky, MD",
     logo: "practice-logo.png",
-    dashboardUrl: "https://josephrobillardBACP.github.io/sujansky-workflow/",
+    dashboardUrl: "https://josephrobillardBACP.github.io/travel-medicine-workflow/",
     responsesUrl: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${SHEET_GID}#gid=${SHEET_GID}`,
     fetchPatients,
   };
