@@ -22,9 +22,10 @@ const CHECKLIST = [
 // RUNTIME STATE
 // ═══════════════════════════════════════════════════════════════════
 
-let activePractice = null;
-let patients       = [];
-let expandedId     = null;
+let activePractice       = null;
+let patients             = [];
+let expandedId           = null;
+let activePracticeFilter = "all";
 
 // ── Persistence ──────────────────────────────────────────────────
 
@@ -116,7 +117,7 @@ function buildTravelKitUrl(patient) {
   url.searchParams.set("view", "doctor");
   url.searchParams.set("patientId", patient.id);
   url.searchParams.set("patient", patient.name);
-  url.searchParams.set("practice", activePractice.id);
+  url.searchParams.set("practice", patient.sourceId || activePractice.id);
   url.searchParams.set("locations", travelLocationsParam(patient.stops));
   return url.toString();
 }
@@ -126,7 +127,7 @@ function getTravelKitStorageKey() {
 }
 
 function getTravelKitRecordKey(patient) {
-  return `${activePractice.id}::${patient.id}`;
+  return `${patient.sourceId || activePractice.id}::${patient.id}`;
 }
 
 function loadTravelKitRecords() {
@@ -282,14 +283,24 @@ function renderArchiveDrawer() {
 function getFilteredSorted() {
   const q        = (document.getElementById("search")?.value || "").toLowerCase().trim();
   const archived = loadArchive();
-  const active   = patients.filter(p => !archived.includes(p.id));
+  const isStaff  = !!activePractice?.isStaff;
+  const active   = patients.filter(p =>
+    !archived.includes(p.id) &&
+    (!isStaff || activePracticeFilter === "all" || p.sourceId === activePracticeFilter)
+  );
   const visible  = q
     ? active.filter(p =>
         p.name.toLowerCase().includes(q) ||
+        (p.practice || "").toLowerCase().includes(q) ||
         (p.stops || []).some(s =>
           s.country.toLowerCase().includes(q) || s.city.toLowerCase().includes(q)))
     : active;
   return [...visible].sort((a, b) => new Date(firstDeparture(a)) - new Date(firstDeparture(b)));
+}
+
+function sourceChip(p) {
+  if (!p.sourceId) return "";
+  return `<span class="chip source-chip source-${p.sourceId}">${p.practice} Workflow</span>`;
 }
 
 function renderItinerary(p) {
@@ -359,14 +370,16 @@ function renderPatients() {
     const isComplete = prog.done === prog.total;
     const n          = p.numCountries || countryCount(p.stops);
 
+    const sourceClass = p.sourceId ? ` patient-card-${p.sourceId}` : "";
     return `
-<article class="patient-card" data-patient-id="${p.id}">
+<article class="patient-card${sourceClass}" data-patient-id="${p.id}">
 
   <div class="card-header-row">
     <button class="patient-summary" type="button" aria-expanded="false">
       <div>
         <h3 class="patient-name">${p.name}</h3>
         <div class="patient-meta">
+          ${sourceChip(p)}
           <span class="chip chip-countries">${n} ${n === 1 ? "country" : "countries"}</span>
           <span class="dest-label">${destinationLabel(p.stops)}</span>
           ${departureChip(p)}
@@ -612,23 +625,58 @@ function renderPracticePicker() {
 }
 
 function selectPractice(id) {
-  activePractice = window.__workflowDataSources[id];
-  patients   = [];
-  expandedId = null;
+  activePractice       = window.__workflowDataSources[id];
+  patients             = [];
+  expandedId           = null;
+  activePracticeFilter = "all";
 
   document.getElementById("practice-picker").style.display = "none";
   document.getElementById("app-shell").style.display = "";
-  document.getElementById("sheet-link").href  = activePractice.responsesUrl;
 
-  const logo = document.getElementById("practice-logo");
-  logo.src = activePractice.logo || "practice-logo.png";
-  logo.alt = activePractice.label;
+  document.getElementById("practice-name").textContent = activePractice.displayName || activePractice.label;
+
+  const sheetLink = document.getElementById("sheet-link");
+  if (activePractice.responsesUrl) {
+    sheetLink.href = activePractice.responsesUrl;
+    sheetLink.style.display = "";
+  } else {
+    sheetLink.style.display = "none";
+  }
+
+  const filters = document.getElementById("practice-filters");
+  if (activePractice.isStaff) {
+    renderPracticeFilters();
+    filters.style.display = "";
+  } else {
+    filters.style.display = "none";
+    filters.innerHTML = "";
+  }
 
   document.getElementById("archive-drawer").dataset.open = "false";
   document.getElementById("archive-drawer").innerHTML = "";
   document.getElementById("search").value = "";
 
   init();
+}
+
+function renderPracticeFilters() {
+  const container = document.getElementById("practice-filters");
+  const sources   = Object.values(window.__workflowDataSources || {}).filter(s => !s.isStaff);
+  const buttons   = [
+    `<button class="practice-filter is-active" type="button" data-practice-filter="all">All</button>`,
+    ...sources.map(s => `<button class="practice-filter" type="button" data-practice-filter="${s.id}">${s.label}</button>`),
+  ];
+  container.innerHTML = buttons.join("");
+
+  container.querySelectorAll(".practice-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activePracticeFilter = btn.dataset.practiceFilter || "all";
+      container.querySelectorAll(".practice-filter").forEach(b => {
+        b.classList.toggle("is-active", b.dataset.practiceFilter === activePracticeFilter);
+      });
+      renderPatients();
+    });
+  });
 }
 
 function showPicker() {
@@ -651,10 +699,22 @@ async function init() {
 
   try {
     patients = await activePractice.fetchPatients();
-    localStorage.setItem(
-      `${activePractice.id}-patients-v1`,
-      JSON.stringify(patients.map(p => ({ id: p.id, name: p.name, stops: p.stops || [] })))
-    );
+
+    if (activePractice.isStaff) {
+      const bySource = {};
+      patients.forEach(p => {
+        if (!p.sourceId) return;
+        (bySource[p.sourceId] ||= []).push({ id: p.id, name: p.name, stops: p.stops || [] });
+      });
+      Object.entries(bySource).forEach(([sid, list]) => {
+        localStorage.setItem(`${sid}-patients-v1`, JSON.stringify(list));
+      });
+    } else {
+      localStorage.setItem(
+        `${activePractice.id}-patients-v1`,
+        JSON.stringify(patients.map(p => ({ id: p.id, name: p.name, stops: p.stops || [] })))
+      );
+    }
     renderPatients();
 
     if (patients.length) {

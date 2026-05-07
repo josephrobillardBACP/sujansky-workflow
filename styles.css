@@ -773,6 +773,101 @@ body {
   font-size: 0.9rem;
 }
 
+/* ── Practice name subtitle (header) ────────────────── */
+.practice-name {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* ── Practice filters (staff mode) ──────────────────── */
+.practice-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.practice-filter {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.practice-filter:hover {
+  background: var(--surface-alt);
+  color: var(--text);
+}
+
+.practice-filter.is-active[data-practice-filter="all"] {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.practice-filter.is-active[data-practice-filter="sujansky"] {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.practice-filter.is-active[data-practice-filter="daniher"] {
+  background: #ccfbf1;
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+
+/* ── Source chips and color-coded cards (staff mode) ── */
+.source-chip {
+  font-weight: 700;
+  font-size: 0.79rem;
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+}
+
+.source-chip.source-sujansky {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.source-chip.source-daniher {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.patient-card-sujansky {
+  border-left: 6px solid #1d4ed8;
+}
+
+.patient-card-daniher {
+  border-left: 6px solid #0f766e;
+}
+
+.patient-card-sujansky.is-open {
+  border-color: #93c5fd;
+  border-left-color: #1d4ed8;
+}
+
+.patient-card-daniher.is-open {
+  border-color: #99f6e4;
+  border-left-color: #0f766e;
+}
+
+.patient-card-sujansky .info-section-title {
+  color: #1d4ed8;
+}
+
+.patient-card-daniher .info-section-title {
+  color: #0f766e;
+}
+
 /* ── Practice picker ────────────────────────────────── */
 .practice-picker {
   min-height: 100vh;
