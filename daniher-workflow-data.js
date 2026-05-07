@@ -1,10 +1,10 @@
 (function () {
-  const PRACTICE_ID = "sujansky";
-  const PRACTICE_LABEL = "Sujansky";
+  const PRACTICE_ID = "daniher";
+  const PRACTICE_LABEL = "Daniher";
   const SHEET_ID = "1og96N5wkXKgoJu-28UaNm4r-uMaVYi3vTEGmXdiH2bM";
-  const SHEET_GID = "658794948";
-  const CONCERNS_COL = 47;
-  const TRAVEL_FLAGS_COL = 68;
+  const SHEET_GID = "360167185";
+  const CONCERNS_COL = 63;
+  const TRAVEL_FLAGS_COL = 64;
 
   function parseDateValue(v) {
     if (!v && v !== 0) return "";
@@ -42,54 +42,54 @@
       {
         count: 5,
         stops: [
-          { country: 33, arrival: 34, departure: 35, city: [62] },
-          { country: 36, arrival: 37, departure: 38, city: [64] },
-          { country: 39, arrival: 40, departure: 41, city: [65] },
-          { country: 42, arrival: 43, departure: 44, city: [66] },
+          { country: 44, arrival: 45, departure: 46, city: [47] },
+          { country: 48, arrival: 49, departure: 50, city: [51] },
+          { country: 52, arrival: 53, departure: 54, city: [55] },
+          { country: 56, arrival: 57, departure: 58, city: [59] },
         ],
-        overflowCountry: 45,
-        overflowDates: 46,
-        overflowCity: 67,
-        returnDate: 44,
-        matches: str => [33, 36, 39, 42, 45].some(idx => str(idx)),
+        overflowCountry: 60,
+        overflowDates: 61,
+        overflowCity: 62,
+        returnDate: 58,
+        matches: str => [44, 48, 52, 56, 60].some(idx => str(idx)),
       },
       {
         count: 4,
         stops: [
-          { country: 21, arrival: 22, departure: 23, city: [58] },
-          { country: 24, arrival: 25, departure: 26, city: [59] },
-          { country: 27, arrival: 28, departure: 29, city: [57] },
-          { country: 30, arrival: 31, departure: 32, city: [61] },
+          { country: 28, arrival: 29, departure: 30, city: [31] },
+          { country: 32, arrival: 33, departure: 34, city: [35] },
+          { country: 36, arrival: 37, departure: 38, city: [39] },
+          { country: 40, arrival: 41, departure: 42, city: [43] },
         ],
-        returnDate: 32,
-        matches: str => [21, 24, 27, 30].some(idx => str(idx)),
+        returnDate: 42,
+        matches: str => [28, 32, 36, 40].some(idx => str(idx)),
       },
       {
         count: 3,
         stops: [
-          { country: 12, arrival: 13, departure: 14, city: [50] },
-          { country: 15, arrival: 16, departure: 17, city: [56] },
-          { country: 18, arrival: 19, departure: 20, city: [60] },
+          { country: 16, arrival: 17, departure: 18, city: [19] },
+          { country: 20, arrival: 21, departure: 22, city: [23] },
+          { country: 24, arrival: 25, departure: 26, city: [27] },
         ],
-        returnDate: 20,
-        matches: str => [12, 15, 18].some(idx => str(idx)),
+        returnDate: 26,
+        matches: str => [16, 20, 24].some(idx => str(idx)),
       },
       {
         count: 2,
         stops: [
-          { country: 6, arrival: 7, departure: 8, city: [54] },
-          { country: 9, arrival: 10, departure: 11, city: [51] },
+          { country: 8, arrival: 9, departure: 10, city: [11] },
+          { country: 12, arrival: 13, departure: 14, city: [15] },
         ],
-        returnDate: 11,
-        matches: str => [6, 9].some(idx => str(idx)),
+        returnDate: 14,
+        matches: str => [8, 12].some(idx => str(idx)),
       },
       {
         count: 1,
         stops: [
-          { country: 4, arrival: 5, departure: 48, city: [55] },
+          { country: 4, arrival: 5, departure: 6, city: [7] },
         ],
-        returnDate: 48,
-        matches: str => [4, 5, 48, 55].some(idx => str(idx)),
+        returnDate: 6,
+        matches: str => [4, 5, 6, 7].some(idx => str(idx)),
       },
     ];
 
@@ -195,7 +195,7 @@
   window.__workflowDataSources[PRACTICE_ID] = {
     id: PRACTICE_ID,
     label: PRACTICE_LABEL,
-    logo: "practice-logo.png",
+    logo: "daniher-logo.png",
     dashboardUrl: "https://josephrobillardBACP.github.io/sujansky-workflow/",
     responsesUrl: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${SHEET_GID}#gid=${SHEET_GID}`,
     fetchPatients,

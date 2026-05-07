@@ -7,7 +7,19 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app-shell">
+
+  <!-- Practice selection screen -->
+  <div id="practice-picker" class="practice-picker">
+    <div class="picker-container">
+      <p class="eyebrow">Concierge Travel Medicine</p>
+      <h1 class="picker-title">Patient Workflow Dashboard</h1>
+      <p class="picker-subtitle">Select a practice to continue</p>
+      <div class="picker-cards" id="picker-cards"></div>
+    </div>
+  </div>
+
+  <!-- Main app (hidden until practice selected) -->
+  <div class="app-shell" id="app-shell" hidden>
 
     <header class="page-header">
       <div class="header-text">
@@ -15,23 +27,17 @@
         <h1>Patient Workflow Dashboard</h1>
       </div>
       <div class="header-actions">
-        <a
-          href="https://docs.google.com/spreadsheets/d/1og96N5wkXKgoJu-28UaNm4r-uMaVYi3vTEGmXdiH2bM/edit?gid=658794948#gid=658794948"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="sheet-link"
-        >View Responses ↗</a>
+        <a id="sheet-link" href="#" target="_blank" rel="noopener noreferrer" class="sheet-link">View Responses ↗</a>
         <span id="sync-status" data-state="syncing">Connecting…</span>
+        <button id="switch-practice-btn" class="switch-practice-btn" type="button">Switch Practice</button>
       </div>
       <div class="practice-brand">
-        <img src="practice-logo.png" alt="Ulrike Sujansky, M.D." class="practice-logo" />
+        <img id="practice-logo" src="" alt="" class="practice-logo" />
       </div>
     </header>
 
-    <!-- Summary counts -->
     <div class="stats-bar" id="stats-bar"></div>
 
-    <!-- Search -->
     <div class="list-controls">
       <input
         id="search"
@@ -43,15 +49,16 @@
       />
     </div>
 
-    <!-- Archive drawer (shown when Archived stat card is clicked) -->
     <div id="archive-drawer"></div>
 
-    <!-- Patient rows -->
     <section>
       <div id="patient-list" class="patient-list"></div>
     </section>
 
   </div>
-  <script src="app.js?v=7"></script>
+
+  <script src="workflow-data.js"></script>
+  <script src="daniher-workflow-data.js"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

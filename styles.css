@@ -772,6 +772,92 @@ body {
   font-size: 0.9rem;
 }
 
+/* ── Practice picker ────────────────────────────────── */
+.practice-picker {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.picker-container {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+.picker-title {
+  margin: 8px 0 4px;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.picker-subtitle {
+  margin: 0 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.picker-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.picker-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 24px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-family: inherit;
+}
+
+.picker-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 20px rgba(29, 78, 216, 0.12);
+  transform: translateY(-2px);
+}
+
+.picker-logo {
+  width: 140px;
+  height: auto;
+}
+
+.picker-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── Switch practice button ─────────────────────────── */
+.switch-practice-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.switch-practice-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* ── Mobile ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .app-shell     { padding: 14px 0 48px; width: 96%; }
