@@ -70,7 +70,7 @@ const CHECKLIST = [
   },
   { text: "Determine and order recommended vaccines" },
   { text: "Schedule patient appointment for pre-travel consultation and vaccine administration",
-    note: "Schedule once vaccines have arrived" },
+    notes: ["Calculate vaccine costs and confirm with patient", "Schedule once vaccines have arrived"] },
   { text: "Write and order prescriptions" },
   {
     html: `Assemble <a class="checklist-link" href="https://justintella.github.io/blue-angel-intranet/travel_kit.html" target="_blank" rel="noopener noreferrer">travel kit</a>`,
@@ -474,7 +474,7 @@ function renderPatients() {
           <input type="checkbox" data-patient-id="${p.id}" data-task-index="${i}" ${checked ? "checked" : ""} />
           <span class="checklist-item-text">
             ${renderChecklistTask(task, i, p)}
-            ${task.note ? `<span class="checklist-note">⚠ ${task.note}</span>` : ""}
+            ${(task.notes ?? (task.note ? [task.note] : [])).map(n => `<span class="checklist-note">⚠ ${n}</span>`).join("")}
           </span>
         </label>`;
       }).join("")}
