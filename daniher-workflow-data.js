@@ -195,6 +195,7 @@
   window.__workflowDataSources[PRACTICE_ID] = {
     id: PRACTICE_ID,
     label: PRACTICE_LABEL,
+    displayName: "Amy Daniher, MD",
     logo: "daniher-logo.png",
     dashboardUrl: "https://josephrobillardBACP.github.io/sujansky-workflow/",
     responsesUrl: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?gid=${SHEET_GID}#gid=${SHEET_GID}`,

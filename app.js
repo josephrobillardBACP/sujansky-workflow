@@ -602,8 +602,7 @@ function renderPracticePicker() {
   const cards   = document.getElementById("picker-cards");
   cards.innerHTML = sources.map(src => `
     <button class="picker-card" type="button" data-practice-id="${src.id}">
-      <img class="picker-logo" src="${src.logo || 'practice-logo.png'}" alt="${src.label}" />
-      <span class="picker-label">${src.label}</span>
+      ${src.displayName || src.label}
     </button>
   `).join("");
 
