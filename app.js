@@ -11,7 +11,7 @@ const CHECKLIST = [
     notes: ["Calculate vaccine costs and confirm with patient", "Schedule once vaccines have arrived"] },
   { text: "Write and order prescriptions" },
   {
-    html: `Assemble <a class="checklist-link" href="https://justintella.github.io/blue-angel-intranet/travel_kit.html" target="_blank" rel="noopener noreferrer">travel kit</a>`,
+    html: `Assemble <a class="checklist-link" href="travel_kit.html" target="_blank" rel="noopener noreferrer">travel kit</a>`,
   },
   { text: "Conduct patient appointment, administer vaccines, assign prescriptions, and provide the travel kit" },
   { text: "Schedule any follow-ups if necessary" },
@@ -113,8 +113,8 @@ function travelLocationsParam(stops) {
 }
 
 function buildTravelKitUrl(patient) {
-  const url = new URL("https://justintella.github.io/blue-angel-intranet/travel_kit.html");
-  url.searchParams.set("view", "doctor");
+  const url = new URL("travel_kit.html", window.location.href);
+  url.searchParams.set("view", activePractice?.isStaff ? "staff" : "doctor");
   url.searchParams.set("patientId", patient.id);
   url.searchParams.set("patient", patient.name);
   url.searchParams.set("practice", patient.sourceId || activePractice.id);

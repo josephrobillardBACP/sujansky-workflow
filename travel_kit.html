@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Medicine Kit</title>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --text: #12202f;
+    --muted: #667788;
+    --line: #e6edf3;
+    --accent: #3b7dd8;
+    --accent-soft: #edf4ff;
+    --accent-deep: #275da5;
+    --green-bg: #f2fbf6;
+    --green-line: #cdebd8;
+    --green-text: #227a4f;
+    --green-hover: #e6f7ee;
+    --red-bg: #fff5f4;
+    --red-line: #f1d0cb;
+    --red-text: #b5473c;
+    --red-hover: #fdebea;
+    --sand-bg: #fbfaf6;
+    --sand-line: #e7dfcd;
+    --sand-text: #6e5a34;
+    --sand-hover: #f7f1e7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    padding: 24px 20px 36px;
+  }
+
+  button, summary { font: inherit; }
+
+  .page-wrap {
+    margin: 0 auto;
+    max-width: 1280px;
+  }
+
+  .page-header,
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+
+  .page-header {
+    position: relative;
+    margin-bottom: 18px;
+    padding: 24px 26px;
+  }
+
+  .header-back {
+    margin-bottom: 14px;
+  }
+
+  .all-patients-button {
+    align-items: center;
+    background: #f7faff;
+    border: 1px solid #d6e5f8;
+    border-radius: 999px;
+    color: #315fb7;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 8px;
+    padding: 7px 12px;
+    text-decoration: none;
+  }
+
+  .all-patients-button:hover {
+    background: #eaf2ff;
+    border-color: #b8cff1;
+    color: #244c95;
+  }
+
+  .all-patients-arrow {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .header-main {
+    max-width: 100%;
+    padding-right: 250px;
+  }
+
+  .page-eyebrow {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .page-title {
+    color: #111827;
+    font-size: 30px;
+    font-weight: 760;
+    letter-spacing: -0.03em;
+  }
+
+  .source-pill {
+    position: absolute;
+    right: 26px;
+    top: 24px;
+    border: 1.5px solid var(--accent);
+    border-radius: 999px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 650;
+    padding: 8px 14px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .source-pill:hover { background: var(--accent-soft); }
+
+  .header-meta {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .header-topline {
+    align-items: stretch;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 185px 185px minmax(0, 1fr);
+  }
+
+  .context-card {
+    align-items: flex-start;
+    background: #f7faff;
+    border: 1px solid #d6e5f8;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 58px;
+    padding: 7px 11px;
+  }
+
+  .context-label {
+    color: #4b73d2;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+
+  .context-value {
+    color: #142334;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+
+  .travel-summary-main {
+    color: #142334;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+
+  .travel-summary-sub {
+    color: #4a5b6c;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 3px;
+  }
+
+  .header-approval {
+    align-items: center;
+    align-self: stretch;
+    background: #f7faff;
+    border: 1px solid #d6e5f8;
+    border-radius: 12px;
+    display: flex;
+    min-height: 58px;
+    padding: 7px 11px;
+  }
+
+  .approval-row {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: auto auto minmax(8px, 1fr) 1px auto;
+    width: 100%;
+  }
+
+  .approval-head {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .approval-title {
+    color: #12202f;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .approval-inline {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .approval-spacer {
+    min-width: 8px;
+  }
+
+  .approval-divider {
+    align-self: center;
+    border-left: 1px solid #c7d9f2;
+    height: 22px;
+    margin: 0;
+  }
+
+  .view-pill {
+    background: #f7fafc;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: #526170;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    text-decoration: none;
+  }
+
+  .view-pill.active {
+    background: var(--accent-soft);
+    border-color: #cadef8;
+    color: var(--accent-deep);
+  }
+
+  @media (max-width: 980px) {
+    .header-topline {
+      grid-template-columns: 1fr;
+    }
+
+    .header-main {
+      padding-right: 0;
+    }
+
+    .source-pill {
+      margin-top: 14px;
+      position: static;
+    }
+  }
+
+  .workspace {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(380px, 0.9fr);
+  }
+
+  .card {
+    padding: 22px 24px;
+  }
+
+  .card-title {
+    color: #111827;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .kit-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .kit-title-block {
+    min-width: 0;
+  }
+
+  .kit-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .card-copy {
+    color: #3d4e60;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .workflow-panel {
+    background: #f8fbff;
+    border: 1px solid #deebfb;
+    border-radius: 12px;
+    margin-top: 16px;
+    padding: 14px 15px;
+  }
+
+  .workflow-title {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .workflow-head {
+    align-items: flex-start;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .workflow-copy {
+    color: #3f5164;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .status-pill {
+    border-radius: 999px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-top: 0;
+    padding: 4px 7px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .status-pill.approved {
+    background: var(--green-bg);
+    border: 1px solid var(--green-line);
+    color: var(--green-text);
+  }
+
+  .status-pill.pending {
+    background: var(--red-bg);
+    border: 1px solid var(--red-line);
+    color: var(--red-text);
+  }
+
+  .workflow-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .starter-button,
+  .action-button,
+  .remove-button,
+  .clear-button,
+  .print-button,
+  .approve-button {
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(18, 32, 47, 0.06);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.015em;
+    padding: 6px 11px;
+    transition: 140ms ease;
+  }
+
+  .starter-button {
+    background: #f4f8ff;
+    border-color: #9fc2ef;
+    color: #255ea8;
+  }
+
+  .starter-button:hover {
+    background: #e9f2ff;
+    border-color: #83afe8;
+    box-shadow: 0 2px 6px rgba(59, 125, 216, 0.16);
+  }
+
+  .action-button,
+  .approve-button {
+    background: #e8f7ee;
+    border-color: #8dcc9f;
+    color: #145c39;
+  }
+
+  .action-button:hover,
+  .approve-button:hover {
+    background: #d5efdf;
+    border-color: #71bb89;
+    box-shadow: 0 2px 6px rgba(34, 122, 79, 0.18);
+    color: #114e30;
+  }
+
+  .remove-button,
+  .clear-button {
+    background: #feeeee;
+    border-color: #e6a79f;
+    color: #9b362c;
+  }
+
+  .remove-button:hover,
+  .clear-button:hover {
+    background: #fbdedb;
+    border-color: #db8e84;
+    box-shadow: 0 2px 6px rgba(181, 71, 60, 0.18);
+    color: #872d25;
+  }
+
+  .print-button {
+    background: #fbf7ef;
+    border-color: #d9c79f;
+    color: #70572e;
+  }
+
+  .print-button:hover {
+    background: #f6efdf;
+    border-color: #ccb47d;
+    box-shadow: 0 2px 6px rgba(110, 90, 52, 0.14);
+    color: #5d4825;
+  }
+
+  .undo-button {
+    background: #fbfcfe;
+    border: 1.5px solid #cfd9e4;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(18, 32, 47, 0.05);
+    color: #55616f;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 6px 11px;
+    transition: 140ms ease;
+  }
+
+  .undo-button:hover {
+    background: #f4f7fa;
+    border-color: #b9c8d7;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.14);
+    color: #44505d;
+  }
+
+  .starter-button:focus-visible,
+  .action-button:focus-visible,
+  .remove-button:focus-visible,
+  .clear-button:focus-visible,
+  .print-button:focus-visible,
+  .approve-button:focus-visible,
+  .undo-button:focus-visible {
+    outline: 2px solid rgba(59, 125, 216, 0.24);
+    outline-offset: 2px;
+  }
+
+  .toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 16px;
+  }
+
+  .toolbar-copy {
+    color: #3d4e60;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .accordion {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .accordion-section {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .accordion-summary {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    padding: 14px 16px;
+    transition: background 120ms ease;
+  }
+
+  .accordion-summary::-webkit-details-marker { display: none; }
+  .accordion-summary:hover { background: #f8fbff; }
+
+  .accordion-head {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+  }
+
+  .accordion-icon {
+    align-items: center;
+    border: 1px solid #d7e4f5;
+    border-radius: 999px;
+    color: var(--accent-deep);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
+  }
+
+  .accordion-section[open] .accordion-icon {
+    background: var(--accent-soft);
+  }
+
+  .accordion-arrow {
+    border-bottom: 2px solid var(--accent-deep);
+    border-right: 2px solid var(--accent-deep);
+    display: block;
+    height: 7px;
+    transform: rotate(45deg);
+    transition: transform 120ms ease;
+    width: 7px;
+  }
+
+  .accordion-section[open] .accordion-arrow {
+    margin-top: 4px;
+    transform: rotate(225deg);
+  }
+
+  .accordion-title {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .accordion-count {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .accordion-body {
+    border-top: 1px solid var(--line);
+    padding: 8px 12px 12px;
+  }
+
+  .item-list,
+  .kit-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .item-copy-head {
+    align-items: start;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .instruction-edit-button {
+    align-items: center;
+    background: #f7faff;
+    border: 1px solid #d6e5f8;
+    border-radius: 999px;
+    color: #4b73d2;
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 700;
+    height: 28px;
+    justify-content: center;
+    line-height: 1;
+    width: 28px;
+  }
+
+  .instruction-edit-button:hover {
+    background: #eaf2ff;
+    border-color: #b8cff1;
+    color: #315fb7;
+  }
+
+  .instruction-modal[hidden] {
+    display: none;
+  }
+
+  .instruction-modal {
+    align-items: center;
+    background: rgba(18, 32, 47, 0.36);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 20px;
+    position: fixed;
+    z-index: 50;
+  }
+
+  .instruction-modal-card {
+    background: #ffffff;
+    border: 1px solid #d6e5f8;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(18, 32, 47, 0.18);
+    max-width: 680px;
+    padding: 22px;
+    width: min(100%, 680px);
+  }
+
+  .instruction-modal-title {
+    color: #12202f;
+    font-size: 18px;
+    font-weight: 750;
+    line-height: 1.2;
+  }
+
+  .instruction-modal-subtitle {
+    color: #3d4e60;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-top: 6px;
+  }
+
+  .instruction-modal-field {
+    margin-top: 16px;
+  }
+
+  .instruction-modal-label {
+    color: #4b73d2;
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .instruction-modal-textarea {
+    border: 1px solid #c7d9f2;
+    border-radius: 14px;
+    color: #142334;
+    font: inherit;
+    min-height: 160px;
+    padding: 14px 16px;
+    resize: vertical;
+    width: 100%;
+  }
+
+  .instruction-modal-textarea:focus {
+    border-color: #7da8e9;
+    box-shadow: 0 0 0 3px rgba(59, 125, 216, 0.14);
+    outline: none;
+  }
+
+  .instruction-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  .item-row,
+  .kit-row {
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px;
+  }
+
+  .item-name,
+  .kit-name {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 720;
+    margin-bottom: 6px;
+  }
+
+  .item-detail,
+  .kit-detail {
+    color: #2f4255;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .item-qty,
+  .kit-qty {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .kit-shell {
+    position: sticky;
+    top: 18px;
+  }
+
+  .kit-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .kit-intro {
+    background: #f8fbff;
+    border: 1px solid #dfebfa;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 14px 15px;
+  }
+
+  .kit-intro-label {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .kit-intro-copy {
+    color: #34485c;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .section-block {
+    margin-top: 22px;
+  }
+
+  .section-block:first-child { margin-top: 0; }
+
+  .section-head {
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+
+  .section-title {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 730;
+  }
+
+  .section-count {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .empty-state {
+    background: #fafcff;
+    border: 1px dashed #ccd9e7;
+    border-radius: 12px;
+    color: #425568;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 18px;
+    text-align: center;
+  }
+
+  @media (max-width: 1040px) {
+    .workspace { grid-template-columns: 1fr; }
+    .kit-shell { position: static; }
+  }
+
+  @media (max-width: 720px) {
+    body { padding: 16px 12px 28px; }
+    .page-header, .card { padding: 20px; }
+    .page-header { flex-direction: column; }
+    .item-row, .kit-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="header-main">
+      <div class="header-back">
+        <a class="all-patients-button" id="allPatientsButton" href="#">
+          <span class="all-patients-arrow">←</span>
+          <span>All Patients</span>
+        </a>
+      </div>
+      <div class="page-eyebrow">Concierge Travel Medicine</div>
+      <div class="page-title">Travel Medicine Kit</div>
+      <div class="header-meta">
+        <div class="header-topline">
+          <div class="context-card">
+            <div class="context-label">Patient</div>
+            <div class="context-value" id="patientName"></div>
+          </div>
+          <div class="context-card">
+            <div class="context-label" id="travelLocationsLabel">Travel Location</div>
+            <div class="context-value" id="travelLocations"></div>
+          </div>
+          <div class="header-approval" id="headerApproval"></div>
+        </div>
+      </div>
+    </div>
+    <a href="https://www.cdc.gov/yellow-book/hcp/contents/index.html" target="_blank" rel="noopener noreferrer" class="source-pill">CDC Yellow Book 2026 -></a>
+  </div>
+
+  <div class="workspace" id="workspace">
+    <div class="card" id="leftPanel">
+      <div class="card-title" id="leftCardTitle"></div>
+      <div class="card-copy" id="masterListCopy"></div>
+      <div class="toolbar">
+        <div class="toolbar-copy" id="toolbarCopy"></div>
+        <button class="starter-button" id="starterKitButton" type="button">Basic Kit</button>
+      </div>
+      <div class="accordion" id="itemsList"></div>
+    </div>
+
+    <div class="card kit-shell">
+      <div class="kit-header">
+        <div class="kit-title-block">
+          <div class="card-title" id="kitPanelTitle">Kit Being Built</div>
+          <div class="card-copy" id="kitCopy"></div>
+        </div>
+        <div class="kit-actions" id="kitActions">
+          <button class="print-button" id="printKitButton" type="button">Print</button>
+          <button class="clear-button" id="clearKitButton" type="button">Clear Kit</button>
+        </div>
+      </div>
+      <div class="kit-intro">
+        <div class="kit-intro-label">Build</div>
+        <div class="kit-intro-copy" id="buildSummary"></div>
+      </div>
+      <div id="kitList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="instruction-modal" id="instructionModal" hidden>
+  <div class="instruction-modal-card">
+    <div class="instruction-modal-title" id="instructionModalTitle">Edit Instructions</div>
+    <div class="instruction-modal-subtitle">These edits apply only to the current patient's kit and will show in the created kit and staff view.</div>
+    <div class="instruction-modal-field">
+      <label class="instruction-modal-label" for="instructionModalTextarea">Instructions</label>
+      <textarea class="instruction-modal-textarea" id="instructionModalTextarea"></textarea>
+    </div>
+    <div class="instruction-modal-actions">
+      <button class="undo-button" id="instructionModalCancel" type="button">Cancel</button>
+      <button class="approve-button" id="instructionModalSave" type="button">Save Instructions</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const catalog = [
+    { id: "wound-care", category: "Wound Care & Bandages", items: [
+      { id: "adhesive-bandages", name: "Adhesive Bandages, assorted (incl. waterproof)", qty: "15-20", instructions: "Clean the area, apply bandage, change daily or when wet." },
+      { id: "gauze-pads", name: "Gauze Pads (2x2 and 4x4 inch)", qty: "4-6 pads", instructions: "Cover larger wounds. Add a thin layer of antibiotic ointment first to prevent sticking. Secure with tape." },
+      { id: "elastic-bandage", name: "Elastic Bandage (2-inch and 4-inch)", qty: "1 of each", instructions: "Wrap snugly around a sprain - firm, but not tight enough to cause tingling or numbness." },
+      { id: "closure-strips", name: "Wound Closure Strips", qty: "8-10 strips", instructions: "Clean the wound first. Pinch skin edges together and apply strips across the cut. Do not use on dirty or infected wounds." },
+      { id: "medical-tape", name: "Medical Adhesive Tape", qty: "1 small roll", instructions: "Use to hold gauze or dressings in place." },
+      { id: "blister-gel-pads", name: "Blister Gel Pads", qty: "6-8 pads", instructions: "Do not pop the blister. Place the pad around it to offload pressure. Change daily." },
+      { id: "bandage-scissors", name: "Bandage Scissors", qty: "1", instructions: "For cutting tape and bandages. Allowed in carry-on if blade is under 4 inches." }
+    ]},
+    { id: "otc-medications", category: "OTC Medications", items: [
+      { id: "acetaminophen", name: "Acetaminophen (Tylenol) 500mg", qty: "24 tablets", instructions: "Take 1-2 tablets every 6-8 hours for pain or fever. Do not exceed 6 tablets per day. Avoid alcohol." },
+      { id: "ibuprofen", name: "Ibuprofen (Advil) 200mg", qty: "24 tablets", instructions: "Take 1-2 tablets every 6-8 hours with food for pain, fever, or swelling. Avoid if you have stomach ulcers or kidney problems." },
+      { id: "loperamide", name: "Loperamide (Imodium) 2mg", qty: "12 capsules", instructions: "Take 2 capsules after the first loose stool, then 1 after each one that follows. Max 8 per day. Stop and use your antibiotic instead if you have bloody diarrhea or fever." },
+      { id: "famotidine", name: "Famotidine (Pepcid) 20mg", qty: "10 tablets", instructions: "Take 1 tablet for heartburn or stomach upset. Can take twice daily if needed." },
+      { id: "ors", name: "Oral Rehydration Salts (ORS)", qty: "4-6 packets", instructions: "Mix 1 packet into 1 liter of clean water. Sip slowly over several hours. Use anytime you have significant diarrhea, vomiting, or feel dehydrated." },
+      { id: "cetirizine", name: "Cetirizine (Zyrtec) 10mg", qty: "14 tablets", instructions: "Take 1 tablet once daily for allergies or hives. Take at night if it makes you drowsy." },
+      { id: "pseudoephedrine", name: "Pseudoephedrine (Sudafed) 30mg", qty: "10 tablets", instructions: "Take 1-2 tablets every 4-6 hours for a stuffy nose or ear pressure on flights. Do not take if you have high blood pressure or heart disease." },
+      { id: "diphenhydramine", name: "Diphenhydramine (Benadryl) 25mg", qty: "12 tablets", instructions: "Take 25-50mg for allergic reactions, hives, or as a sleep aid. Causes drowsiness - do not drive after taking." },
+      { id: "meclizine", name: "Meclizine (Bonine) 25mg", qty: "8 tablets", instructions: "Take 1 tablet 1 hour before travel for motion sickness. May cause some drowsiness." },
+      { id: "bismuth", name: "Bismuth Subsalicylate (Pepto-Bismol) 262mg", qty: "24 tablets", instructions: "Take 2 tablets every 30-60 minutes for mild stomach upset or diarrhea, up to 8 doses per day. Turns stool and tongue black - this is normal. Do not take if allergic to aspirin." }
+    ]},
+    { id: "topicals", category: "Topicals", items: [
+      { id: "neosporin", name: "Antimicrobial Ointment (Neosporin)", qty: "1 small tube", instructions: "Apply a thin layer to minor cuts or scrapes to prevent infection and keep the bandage from sticking." },
+      { id: "hydrocortisone", name: "Hydrocortisone 1% Cream (Cortaid)", qty: "1 small tube", instructions: "Apply a small amount to itchy or irritated skin up to 3 times daily. Do not use on infected or broken skin." },
+      { id: "antifungal", name: "Antifungal Cream (Clotrimazole or Miconazole)", qty: "1 small tube", instructions: "Apply to the affected area twice daily for 1-2 weeks for athlete's foot, jock itch, or ringworm. Keep the area dry." },
+      { id: "aloe-vera", name: "Aloe Vera Gel", qty: "1 small tube", instructions: "Apply generously to sunburned or mildly burned skin. Reapply as needed." },
+      { id: "antiseptic-wipes", name: "Antiseptic Wipes", qty: "10 individually wrapped", instructions: "Use to clean a wound when soap and water aren't available. Single use only." }
+    ]},
+    { id: "instruments", category: "Instruments", items: [
+      { id: "thermometer", name: "Digital Thermometer", qty: "1", instructions: "Place under tongue, mouth closed, for 60 seconds. Fever is 100.4°F (38°C) or higher." },
+      { id: "tweezers", name: "Tweezers", qty: "1", instructions: "For splinters or ticks. For ticks: grab as close to the skin as possible and pull straight out - do not twist." },
+      { id: "pulse-oximeter", name: "Pulse Oximeter (fingertip)", qty: "1", instructions: "Clip to fingertip for 30 seconds. Normal reading is 95-100%. Below 90% at altitude - descend immediately. Below 90% at sea level - seek emergency care." }
+    ]},
+    { id: "prescriptions", category: "Prescription Medications", items: [
+      { id: "azithromycin", name: "Azithromycin (Zithromax) 500mg", qty: "6 tablets", instructions: "Traveler's diarrhea: take 500mg once daily for 3 days, or a single 1000mg dose if directed. Use when diarrhea is preventing normal activity, or if you have fever or blood in stool. If no improvement after 48 hours, seek care. Respiratory infection: take 500mg on day 1, then 250mg once daily on days 2-5. Complete the full course." },
+      { id: "ciprofloxacin", name: "Ciprofloxacin (Cipro) 500mg", qty: "6 tablets", instructions: "Traveler's diarrhea backup: take 500mg twice daily for 1-3 days only if azithromycin is unavailable. UTI: take 500mg twice daily for 3-7 days. Avoid dairy and antacids within 2 hours. Stop and call your doctor if you develop joint or tendon pain." },
+      { id: "ondansetron", name: "Ondansetron (Zofran) 4mg ODT", qty: "6 dissolving tabs", instructions: "Let the tablet dissolve on your tongue - do not swallow whole. Take for nausea or vomiting that is stopping you from eating or drinking. Can take every 8 hours as needed. Always drink fluids alongside it." },
+      { id: "acetazolamide", name: "Acetazolamide (Diamox) 250mg", qty: "20 tablets", instructions: "Prevention: start 1-2 days before going above 8,000 feet. Take 125-250mg twice daily while ascending and for 2 days at the highest point. Treatment: take 250mg twice daily and stop ascending. Descend if symptoms are not improving within 12-24 hours." }
+    ]}
+  ];
+
+  const basicKitItems = [
+    "acetaminophen", "ibuprofen", "loperamide", "famotidine", "ors", "cetirizine", "pseudoephedrine",
+    "adhesive-bandages", "antiseptic-wipes", "neosporin", "hydrocortisone", "thermometer",
+    "ondansetron", "azithromycin", "ciprofloxacin"
+  ];
+
+  const basicKitSet = new Set(basicKitItems);
+
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const currentView = params.get("view") === "doctor" ? "doctor" : "staff";
+  const patientNameValue = params.get("patient") || "Maya Chen";
+  const patientIdValue = params.get("patientId") || patientNameValue.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const practiceValue = params.get("practice") || params.get("source") || "general";
+  const travelLocationsValue = params.get("locations") || params.get("location") || "Peru";
+  const storageKey = "travel-kit-workflow-records-v4";
+  const recordKey = practiceValue + "::" + patientIdValue;
+  const legacyRecordPrefix = recordKey + "::";
+
+  const itemsList = document.getElementById("itemsList");
+  const kitList = document.getElementById("kitList");
+  const buildSummary = document.getElementById("buildSummary");
+  const clearKitButton = document.getElementById("clearKitButton");
+  const starterKitButton = document.getElementById("starterKitButton");
+  const printKitButton = document.getElementById("printKitButton");
+  const instructionModal = document.getElementById("instructionModal");
+  const instructionModalTitle = document.getElementById("instructionModalTitle");
+  const instructionModalTextarea = document.getElementById("instructionModalTextarea");
+  const instructionModalCancel = document.getElementById("instructionModalCancel");
+  const instructionModalSave = document.getElementById("instructionModalSave");
+  const patientName = document.getElementById("patientName");
+  const allPatientsButton = document.getElementById("allPatientsButton");
+  const travelLocationsLabel = document.getElementById("travelLocationsLabel");
+  const travelLocations = document.getElementById("travelLocations");
+  const headerApproval = document.getElementById("headerApproval");
+  const workspace = document.getElementById("workspace");
+  const leftPanel = document.getElementById("leftPanel");
+  const kitActions = document.getElementById("kitActions");
+  const kitPanelTitle = document.getElementById("kitPanelTitle");
+  const masterListCopy = document.getElementById("masterListCopy");
+  const toolbarCopy = document.getElementById("toolbarCopy");
+  const kitCopy = document.getElementById("kitCopy");
+  const leftCardTitle = document.getElementById("leftCardTitle");
+  let editingInstructionItemId = null;
+  let openSections = new Set();
+
+  function loadRecords() {
+    try {
+      return JSON.parse(window.localStorage.getItem(storageKey) || "{}");
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function buildInitialRecord(initialView) {
+    return {
+      sharedKit: [],
+      customInstructions: {},
+      approved: false,
+      approvedAt: "",
+      lastUpdatedBy: initialView === "doctor" ? "doctor" : "staff"
+    };
+  }
+
+  let records = loadRecords();
+
+  function normalizeRecord(record, initialView) {
+    return {
+      sharedKit: Array.isArray(record?.sharedKit) ? [...new Set(record.sharedKit)] : [],
+      customInstructions: record?.customInstructions && typeof record.customInstructions === "object"
+        ? { ...record.customInstructions }
+        : {},
+      approved: !!record?.approved,
+      approvedAt: record?.approvedAt || "",
+      lastUpdatedBy: record?.lastUpdatedBy || (initialView === "doctor" ? "doctor" : "staff")
+    };
+  }
+
+  function findLegacyRecord(recordsMap) {
+    const exactLegacy = recordsMap[practiceValue + "::" + patientIdValue + "::" + travelLocationsValue];
+    if (exactLegacy) return exactLegacy;
+
+    const candidates = Object.entries(recordsMap)
+      .filter(([key]) => key.startsWith(legacyRecordPrefix))
+      .map(([, value]) => value);
+
+    if (!candidates.length) return null;
+
+    return candidates.sort((left, right) => {
+      const leftScore = (left?.sharedKit?.length || 0) + (Object.keys(left?.customInstructions || {}).length * 5) + (left?.approved ? 100 : 0);
+      const rightScore = (right?.sharedKit?.length || 0) + (Object.keys(right?.customInstructions || {}).length * 5) + (right?.approved ? 100 : 0);
+      return rightScore - leftScore;
+    })[0];
+  }
+
+  function ensureCurrentRecord() {
+    records = loadRecords();
+
+    if (!records[recordKey]) {
+      const legacyRecord = findLegacyRecord(records);
+      records[recordKey] = normalizeRecord(legacyRecord || buildInitialRecord(currentView), currentView);
+
+      Object.keys(records)
+        .filter((key) => key.startsWith(legacyRecordPrefix))
+        .forEach((key) => {
+          delete records[key];
+        });
+
+      saveRecords();
+    }
+  }
+
+  ensureCurrentRecord();
+
+  function currentRecord() {
+    ensureCurrentRecord();
+    return records[recordKey];
+  }
+
+  function saveRecords() {
+    window.localStorage.setItem(storageKey, JSON.stringify(records));
+  }
+
+  function getEditableIds() {
+    return currentRecord().sharedKit;
+  }
+
+  function setEditableIds(nextIds, changedBy) {
+    const record = currentRecord();
+    record.sharedKit = [...nextIds];
+    record.lastUpdatedBy = changedBy;
+    record.approved = false;
+    record.approvedAt = "";
+    saveRecords();
+  }
+
+  function getEditableSet() {
+    return new Set(getEditableIds());
+  }
+
+  function getInstructionText(item) {
+    return currentRecord().customInstructions?.[item.id] || item.instructions;
+  }
+
+  function setInstructionOverride(itemId, nextInstructions, changedBy) {
+    const record = currentRecord();
+    if (!record.customInstructions) record.customInstructions = {};
+    if (nextInstructions && nextInstructions.trim() && nextInstructions.trim() !== findItemById(itemId)?.instructions) {
+      record.customInstructions[itemId] = nextInstructions.trim();
+    } else {
+      delete record.customInstructions[itemId];
+    }
+    record.lastUpdatedBy = changedBy;
+    record.approved = false;
+    record.approvedAt = "";
+    saveRecords();
+  }
+
+  function setApprovalState(isApproved) {
+    const record = currentRecord();
+    record.approved = !!isApproved;
+    record.approvedAt = isApproved ? new Date().toLocaleString() : "";
+    record.lastUpdatedBy = "doctor";
+    saveRecords();
+  }
+
+  function findItemById(itemId) {
+    return catalog.flatMap((section) => section.items).find((item) => item.id === itemId);
+  }
+
+  function openInstructionEditor(item) {
+    editingInstructionItemId = item.id;
+    instructionModalTitle.textContent = `Edit Instructions: ${item.name}`;
+    instructionModalTextarea.value = getInstructionText(item);
+    instructionModal.hidden = false;
+    window.requestAnimationFrame(() => {
+      instructionModalTextarea.focus();
+      instructionModalTextarea.setSelectionRange(instructionModalTextarea.value.length, instructionModalTextarea.value.length);
+    });
+  }
+
+  function closeInstructionEditor() {
+    editingInstructionItemId = null;
+    instructionModal.hidden = true;
+  }
+
+  function saveInstructionEditor() {
+    if (!editingInstructionItemId) return;
+    setInstructionOverride(editingInstructionItemId, instructionModalTextarea.value, "doctor");
+    closeInstructionEditor();
+    render();
+  }
+
+  function parseTravelStops(rawLocations) {
+    return String(rawLocations || "")
+      .split("|")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const pieces = part.split(",").map((piece) => piece.trim()).filter(Boolean);
+        return {
+          full: part,
+          country: pieces[0] || part,
+          detail: pieces.slice(1).join(", ")
+        };
+      });
+  }
+
+  function renderTravelLocationsCard() {
+    const stops = parseTravelStops(travelLocationsValue);
+    travelLocationsLabel.textContent = stops.length > 1 ? "Travel Locations" : "Travel Location";
+    if (!stops.length) {
+      travelLocations.textContent = travelLocationsValue;
+      return;
+    }
+
+    if (stops.length === 1) {
+      travelLocations.textContent = stops[0].full;
+      travelLocations.title = stops[0].full;
+      return;
+    }
+
+    const uniqueCountries = [...new Set(stops.map((stop) => stop.country))];
+    const visibleCountries = uniqueCountries.slice(0, 3).join(", ");
+    const remainingCountries = uniqueCountries.length - 3;
+    const summary = remainingCountries > 0
+      ? `${visibleCountries} +${remainingCountries} more`
+      : visibleCountries;
+
+    travelLocations.innerHTML = `
+      <div class="travel-summary-main">${summary}</div>
+      <div class="travel-summary-sub">${stops.length} stops</div>
+    `;
+    travelLocations.title = stops.map((stop) => stop.full).join(" | ");
+  }
+
+  function getAllPatientsUrl() {
+    const hubUrl = new URL("patient_hub.html", window.location.href);
+    hubUrl.searchParams.set("view", currentView);
+    if (currentView === "doctor") {
+      hubUrl.searchParams.set("practice", practiceValue);
+    }
+    return hubUrl.toString();
+  }
+
+  function captureOpenSections() {
+    const nextOpen = new Set();
+    itemsList.querySelectorAll("details[data-section-id]").forEach((details) => {
+      if (details.open) nextOpen.add(details.dataset.sectionId);
+    });
+    openSections = nextOpen;
+  }
+
+  function renderHeaderContext() {
+    const record = currentRecord();
+    patientName.textContent = patientNameValue;
+    renderTravelLocationsCard();
+    headerApproval.style.display = "block";
+    allPatientsButton.href = getAllPatientsUrl();
+
+    if (currentView === "doctor") {
+      workspace.style.gridTemplateColumns = "minmax(0, 1.1fr) minmax(380px, 0.9fr)";
+      leftPanel.style.display = "block";
+      starterKitButton.style.display = "";
+      clearKitButton.style.display = "";
+      printKitButton.style.display = "";
+      leftCardTitle.textContent = "Doctor Review";
+      kitPanelTitle.textContent = "Kit Created";
+      masterListCopy.textContent = "Review the patient kit, make any edits you want, and approve it when it is correct.";
+      toolbarCopy.textContent = "Doctor edits update the same patient-specific kit shown in staff view.";
+      starterKitButton.textContent = "Basic Kit";
+      clearKitButton.textContent = "Clear Kit";
+      kitCopy.textContent = "";
+    } else {
+      workspace.style.gridTemplateColumns = "1fr";
+      leftPanel.style.display = "none";
+      starterKitButton.style.display = "none";
+      clearKitButton.style.display = "none";
+      printKitButton.style.display = "";
+      kitPanelTitle.textContent = "Kit Created";
+      kitCopy.textContent = "";
+    }
+
+    if (currentView === "doctor") {
+      headerApproval.innerHTML = `
+        <div class="approval-row">
+          <div class="approval-head">
+            <div class="approval-title">Doctor Approval</div>
+          </div>
+          <div class="approval-spacer"></div>
+          <div class="approval-divider"></div>
+          <div class="approval-inline">
+            <div class="status-pill ${record.approved ? "approved" : "pending"}" style="margin-top:0;">${record.approved ? "Approved" : "Not Approved"}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      headerApproval.innerHTML = `
+        <div class="approval-row">
+          <div class="approval-head">
+            <div class="approval-title">Staff View</div>
+          </div>
+          <div class="approval-spacer"></div>
+          <div class="approval-divider"></div>
+          <div class="approval-inline">
+            <div class="status-pill ${record.approved ? "approved" : "pending"}" style="margin-top:0;">${record.approved ? "Approved" : "Needs Doctor Approval"}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    let inlineApproveButton = document.getElementById("inlineApproveKitButton");
+    if (inlineApproveButton) inlineApproveButton.remove();
+    if (currentView === "doctor") {
+      inlineApproveButton = document.createElement("button");
+      inlineApproveButton.type = "button";
+      inlineApproveButton.className = record.approved ? "undo-button" : "approve-button";
+      inlineApproveButton.id = "inlineApproveKitButton";
+      inlineApproveButton.textContent = record.approved ? "Undo Approval" : "Approve Kit";
+      inlineApproveButton.addEventListener("click", () => {
+        const nextApproved = !currentRecord().approved;
+        setApprovalState(nextApproved);
+        render();
+      });
+      const clearButtonNode = document.getElementById("clearKitButton");
+      if (clearButtonNode) {
+        kitActions.insertBefore(inlineApproveButton, clearButtonNode);
+      } else {
+        kitActions.appendChild(inlineApproveButton);
+      }
+    }
+  }
+
+  function renderItemsList() {
+    captureOpenSections();
+    itemsList.innerHTML = "";
+    const selected = getEditableSet();
+
+    catalog.forEach((section) => {
+      const menuItems = section.id === "prescriptions"
+        ? section.items
+        : section.items.filter((item) => basicKitSet.has(item.id));
+      const remaining = menuItems.filter((item) => !selected.has(item.id));
+
+      if (!menuItems.length) return;
+
+      const details = document.createElement("details");
+      details.className = "accordion-section";
+      details.dataset.sectionId = section.id;
+      if (openSections.has(section.id)) details.open = true;
+
+      const summary = document.createElement("summary");
+      summary.className = "accordion-summary";
+      summary.innerHTML =
+        "<div class='accordion-head'><span class='accordion-icon'><span class='accordion-arrow'></span></span><div class='accordion-title'>" + section.category + "</div></div>" +
+        "<div class='accordion-count'>" + remaining.length + " available</div>";
+      details.appendChild(summary);
+
+      const body = document.createElement("div");
+      body.className = "accordion-body";
+
+      if (!remaining.length) {
+        body.innerHTML = "<div class='empty-state'>Everything from this section is already in this kit.</div>";
+      } else {
+        const list = document.createElement("div");
+        list.className = "item-list";
+
+        remaining.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "item-row";
+
+          const left = document.createElement("div");
+          left.innerHTML =
+            "<div class='item-copy-head'><div class='item-name'>" + item.name + "</div></div>" +
+            "<div class='item-detail'>" + getInstructionText(item) + "</div>" +
+            "<div class='item-qty'>" + item.qty + "</div>";
+
+          if (currentView === "doctor") {
+            const head = left.querySelector(".item-copy-head");
+            const editButton = document.createElement("button");
+            editButton.type = "button";
+            editButton.className = "instruction-edit-button";
+            editButton.textContent = "✎";
+            editButton.title = "Edit instructions";
+            editButton.addEventListener("click", () => {
+              openInstructionEditor(item);
+            });
+            head.appendChild(editButton);
+          }
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "action-button";
+          button.textContent = currentView === "doctor" ? "Add" : "Add to kit";
+          button.addEventListener("click", () => {
+            const nextIds = [...getEditableSet(), item.id];
+            setEditableIds(nextIds, currentView);
+            render();
+          });
+
+          row.appendChild(left);
+          row.appendChild(button);
+          list.appendChild(row);
+        });
+
+        body.appendChild(list);
+      }
+
+      details.appendChild(body);
+      itemsList.appendChild(details);
+    });
+  }
+
+  function renderKitList() {
+    kitList.innerHTML = "";
+    const selected = getEditableSet();
+
+    let total = 0;
+    let usedSections = 0;
+
+    catalog.forEach((section) => {
+      const chosen = section.items.filter((item) => selected.has(item.id));
+      if (!chosen.length) return;
+
+      total += chosen.length;
+      usedSections += 1;
+
+      const wrap = document.createElement("div");
+      wrap.className = "section-block";
+
+      const head = document.createElement("div");
+      head.className = "section-head";
+      head.innerHTML =
+        "<div class='section-title'>" + section.category + "</div>" +
+        "<div class='section-count'>" + chosen.length + " selected</div>";
+      wrap.appendChild(head);
+
+      const list = document.createElement("div");
+      list.className = "kit-list";
+
+      chosen.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "kit-row";
+
+        const left = document.createElement("div");
+        left.innerHTML =
+          "<div class='item-copy-head'><div class='kit-name'>" + item.name + "</div></div>" +
+          "<div class='kit-detail'>" + getInstructionText(item) + "</div>" +
+          "<div class='kit-qty'>" + item.qty + "</div>";
+
+        if (currentView === "doctor") {
+          const head = left.querySelector(".item-copy-head");
+          const editButton = document.createElement("button");
+          editButton.type = "button";
+          editButton.className = "instruction-edit-button";
+          editButton.textContent = "✎";
+          editButton.title = "Edit instructions";
+          editButton.addEventListener("click", () => {
+            openInstructionEditor(item);
+          });
+          head.appendChild(editButton);
+        }
+
+        row.appendChild(left);
+        if (currentView === "doctor") {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "remove-button";
+          button.textContent = "Remove";
+          button.addEventListener("click", () => {
+            const nextIds = getEditableIds().filter((id) => id !== item.id);
+            setEditableIds(nextIds, currentView);
+            render();
+          });
+          row.appendChild(button);
+        }
+        list.appendChild(row);
+      });
+
+      wrap.appendChild(list);
+      kitList.appendChild(wrap);
+    });
+
+    if (!total) {
+      kitList.innerHTML = "<div class='empty-state'>Nothing is in the kit yet.</div>";
+      buildSummary.textContent = "No items added yet.";
+    } else {
+      const record = currentRecord();
+      const suffix = record.approved
+        ? " Approved by doctor."
+        : " Awaiting doctor approval.";
+      buildSummary.textContent = total + " items across " + usedSections + " sections." + suffix;
+    }
+  }
+
+  function render() {
+    ensureCurrentRecord();
+    renderHeaderContext();
+    renderItemsList();
+    renderKitList();
+  }
+
+  starterKitButton.addEventListener("click", () => {
+    setEditableIds(basicKitItems, currentView);
+    render();
+  });
+
+  clearKitButton.addEventListener("click", () => {
+    setEditableIds([], currentView);
+    render();
+  });
+
+  printKitButton.addEventListener("click", () => {
+    const chosenIds = getEditableIds();
+    const selectedItems = catalog.flatMap((section) =>
+      section.items
+        .filter((item) => chosenIds.includes(item.id))
+        .map((item) => ({ section: section.category, ...item, instructions: getInstructionText(item) }))
+    );
+
+    const sections = catalog.map((section) => {
+      const items = selectedItems.filter((item) => item.section === section.category);
+      if (!items.length) return "";
+      return `
+        <section style="margin-bottom:24px;">
+          <h2 style="font-size:18px;margin:0 0 10px;color:#111827;">${section.category}</h2>
+          ${items.map((item) => `
+            <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e5e7eb;">
+              <div style="font-weight:700;color:#111827;">${item.name}</div>
+              <div style="font-size:13px;color:#374151;margin-top:4px;">Amount: ${item.qty}</div>
+              <div style="font-size:13px;color:#4b5563;line-height:1.55;margin-top:6px;">${item.instructions}</div>
+            </div>
+          `).join("")}
+        </section>
+      `;
+    }).join("");
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Travel Medicine Kit Item List and Instructions</title>
+      </head>
+      <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:32px;color:#111827;">
+        <h1 style="margin:0 0 8px;">Travel Medicine Kit</h1>
+        <p style="margin:0 0 12px;color:#4b5563;">${patientNameValue}</p>
+        <p style="margin:0 0 24px;color:#4b5563;">${travelLocationsValue}</p>
+        <p style="margin:0 0 24px;color:#4b5563;">Item list and instructions.</p>
+        ${sections || "<p>No items in the kit.</p>"}
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  });
+
+  instructionModalCancel.addEventListener("click", () => {
+    closeInstructionEditor();
+  });
+
+  instructionModalSave.addEventListener("click", () => {
+    saveInstructionEditor();
+  });
+
+  instructionModal.addEventListener("click", (event) => {
+    if (event.target === instructionModal) {
+      closeInstructionEditor();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (instructionModal.hidden) return;
+    if (event.key === "Escape") {
+      closeInstructionEditor();
+    }
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      saveInstructionEditor();
+    }
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== storageKey) return;
+    records = loadRecords();
+    render();
+  });
+
+  window.addEventListener("focus", () => {
+    records = loadRecords();
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
