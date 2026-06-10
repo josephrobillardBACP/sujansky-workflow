@@ -872,7 +872,7 @@
     { id: "wound-care", category: "Wound Care & Bandages", items: [
       { id: "adhesive-bandages", name: "Adhesive Bandages, assorted (incl. waterproof)", qty: "15-20", instructions: "Clean the area, apply bandage, change daily or when wet." },
       { id: "gauze-pads", name: "Gauze Pads (2x2 and 4x4 inch)", qty: "4-6 pads", instructions: "Cover larger wounds. Add a thin layer of antibiotic ointment first to prevent sticking. Secure with tape." },
-      { id: "elastic-bandage", name: "Elastic Bandage (2-inch and 4-inch)", qty: "1 of each", instructions: "Wrap snugly around a sprain - firm, but not tight enough to cause tingling or numbness." },
+      { id: "elastic-bandage", name: "ACE Wrap / Elastic Bandage (2-inch and 4-inch)", qty: "1 of each", instructions: "Wrap snugly around a sprain - firm, but not tight enough to cause tingling or numbness. Start below the joint and work upward, overlapping each turn by about half the width of the wrap." },
       { id: "closure-strips", name: "Wound Closure Strips", qty: "8-10 strips", instructions: "Clean the wound first. Pinch skin edges together and apply strips across the cut. Do not use on dirty or infected wounds." },
       { id: "medical-tape", name: "Medical Adhesive Tape", qty: "1 small roll", instructions: "Use to hold gauze or dressings in place." },
       { id: "blister-gel-pads", name: "Blister Gel Pads", qty: "6-8 pads", instructions: "Do not pop the blister. Place the pad around it to offload pressure. Change daily." },
@@ -886,7 +886,6 @@
       { id: "famotidine", name: "Famotidine (Pepcid) 20mg", qty: "10 tablets", instructions: "Take 1 tablet for heartburn or stomach upset. Can take twice daily if needed." },
       { id: "ors", name: "Oral Rehydration Salts (ORS)", qty: "4-6 packets", instructions: "Mix 1 packet into 1 liter of clean water. Sip slowly over several hours. Use anytime you have significant diarrhea, vomiting, or feel dehydrated." },
       { id: "cetirizine", name: "Cetirizine (Zyrtec) 10mg", qty: "14 tablets", instructions: "Take 1 tablet once daily for allergies or hives. Take at night if it makes you drowsy." },
-      { id: "pseudoephedrine", name: "Pseudoephedrine (Sudafed) 30mg", qty: "10 tablets", instructions: "Take 1-2 tablets every 4-6 hours for a stuffy nose or ear pressure on flights. Do not take if you have high blood pressure or heart disease." },
       { id: "diphenhydramine", name: "Diphenhydramine (Benadryl) 25mg", qty: "12 tablets", instructions: "Take 25-50mg for allergic reactions, hives, or as a sleep aid. Causes drowsiness - do not drive after taking." },
       { id: "meclizine", name: "Meclizine (Bonine) 25mg", qty: "8 tablets", instructions: "Take 1 tablet 1 hour before travel for motion sickness. May cause some drowsiness." },
       { id: "bismuth", name: "Bismuth Subsalicylate (Pepto-Bismol) 262mg", qty: "24 tablets", instructions: "Take 2 tablets every 30-60 minutes for mild stomach upset or diarrhea, up to 8 doses per day. Turns stool and tongue black - this is normal. Do not take if allergic to aspirin." }
@@ -899,7 +898,6 @@
       { id: "antiseptic-wipes", name: "Antiseptic Wipes", qty: "10 individually wrapped", instructions: "Use to clean a wound when soap and water aren't available. Single use only." }
     ]},
     { id: "instruments", category: "Instruments", items: [
-      { id: "thermometer", name: "Digital Thermometer", qty: "1", instructions: "Place under tongue, mouth closed, for 60 seconds. Fever is 100.4°F (38°C) or higher." },
       { id: "tweezers", name: "Tweezers", qty: "1", instructions: "For splinters or ticks. For ticks: grab as close to the skin as possible and pull straight out - do not twist." },
       { id: "pulse-oximeter", name: "Pulse Oximeter (fingertip)", qty: "1", instructions: "Clip to fingertip for 30 seconds. Normal reading is 95-100%. Below 90% at altitude - descend immediately. Below 90% at sea level - seek emergency care." }
     ]},
@@ -908,13 +906,14 @@
       { id: "ciprofloxacin", name: "Ciprofloxacin (Cipro) 500mg", qty: "6 tablets", instructions: "Traveler's diarrhea backup: take 500mg twice daily for 1-3 days only if azithromycin is unavailable. UTI: take 500mg twice daily for 3-7 days. Avoid dairy and antacids within 2 hours. Stop and call your doctor if you develop joint or tendon pain." },
       { id: "ondansetron", name: "Ondansetron (Zofran) 4mg ODT", qty: "6 dissolving tabs", instructions: "Let the tablet dissolve on your tongue - do not swallow whole. Take for nausea or vomiting that is stopping you from eating or drinking. Can take every 8 hours as needed. Always drink fluids alongside it." },
       { id: "acetazolamide", name: "Acetazolamide (Diamox) 250mg", qty: "20 tablets", instructions: "Prevention: start 1-2 days before going above 8,000 feet. Take 125-250mg twice daily while ascending and for 2 days at the highest point. Treatment: take 250mg twice daily and stop ascending. Descend if symptoms are not improving within 12-24 hours." },
-      { id: "scopolamine", name: "Scopolamine Patch (Transderm Scop) 1.5mg", qty: "4 patches", instructions: "Apply 1 patch to the hairless area behind one ear at least 4 hours before exposure to motion - the night before travel works well. Each patch lasts up to 3 days; if you need longer protection, remove the old patch and apply a new one behind the opposite ear. Wash hands thoroughly after handling - any residue near the eyes can cause blurred vision and a dilated pupil. May cause dry mouth, drowsiness, and dizziness; avoid alcohol and do not drive until you know how it affects you." }
+      { id: "scopolamine", name: "Scopolamine Patch (Transderm Scop) 1.5mg", qty: "4 patches", instructions: "Apply 1 patch to the hairless area behind one ear at least 4 hours before exposure to motion - the night before travel works well. Each patch lasts up to 3 days; if you need longer protection, remove the old patch and apply a new one behind the opposite ear. Wash hands thoroughly after handling - any residue near the eyes can cause blurred vision and a dilated pupil. May cause dry mouth, drowsiness, and dizziness; avoid alcohol and do not drive until you know how it affects you." },
+      { id: "typhoid", name: "Oral Typhoid (Vivotif) Capsules", qty: "4 capsules", instructions: "Take 1 capsule every other day (days 1, 3, 5, and 7) on an empty stomach, at least 1 hour before eating. Swallow whole with a cool drink - hot liquids inactivate the vaccine. Keep the capsules refrigerated at all times until each dose. Complete the full 4-capsule course at least 1 week before departure so immunity has time to develop; protection lasts about 5 years." }
     ]}
   ];
 
   const basicKitItems = [
-    "acetaminophen", "ibuprofen", "loperamide", "famotidine", "ors", "cetirizine", "pseudoephedrine",
-    "adhesive-bandages", "cold-packs", "antiseptic-wipes", "neosporin", "hydrocortisone", "thermometer",
+    "acetaminophen", "ibuprofen", "loperamide", "famotidine", "ors", "cetirizine", "bismuth",
+    "adhesive-bandages", "cold-packs", "elastic-bandage", "antiseptic-wipes", "neosporin", "hydrocortisone",
     "ondansetron", "azithromycin", "ciprofloxacin"
   ];
 
