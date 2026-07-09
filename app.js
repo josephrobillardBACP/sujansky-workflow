@@ -29,25 +29,59 @@ let activePracticeFilter = "all";
 
 // ── Persistence ──────────────────────────────────────────────────
 
-function getStorageKey() { return `travelMedicineChecklistState_v3_${activePractice.id}`; }
-function getArchiveKey()  { return `travelMedicineArchiveState_v2_${activePractice.id}`; }
+// Shared across every view so archiving in one place hides the patient everywhere.
+const SHARED_CHECKLIST_KEY = "travelMedicineChecklistState_v4";
+const SHARED_ARCHIVE_KEY   = "travelMedicineArchiveState_v3";
+
+// One-time migration from the old per-practice keys → shared keys.
+(function migrateSharedState() {
+  try {
+    if (!localStorage.getItem(SHARED_ARCHIVE_KEY)) {
+      const merged = new Set();
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith("travelMedicineArchiveState_v2_")) {
+          try {
+            const ids = JSON.parse(localStorage.getItem(k) || "[]");
+            if (Array.isArray(ids)) ids.forEach(id => merged.add(id));
+          } catch {}
+        }
+      });
+      if (merged.size) localStorage.setItem(SHARED_ARCHIVE_KEY, JSON.stringify([...merged]));
+    }
+
+    if (!localStorage.getItem(SHARED_CHECKLIST_KEY)) {
+      const merged = {};
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith("travelMedicineChecklistState_v3_")) {
+          try {
+            const state = JSON.parse(localStorage.getItem(k) || "{}");
+            Object.entries(state).forEach(([pid, tasks]) => {
+              merged[pid] = { ...(merged[pid] || {}), ...tasks };
+            });
+          } catch {}
+        }
+      });
+      if (Object.keys(merged).length) localStorage.setItem(SHARED_CHECKLIST_KEY, JSON.stringify(merged));
+    }
+  } catch {}
+})();
 
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(getStorageKey()) || "{}"); }
+  try { return JSON.parse(localStorage.getItem(SHARED_CHECKLIST_KEY) || "{}"); }
   catch { return {}; }
 }
 
 function saveState(s) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(s));
+  localStorage.setItem(SHARED_CHECKLIST_KEY, JSON.stringify(s));
 }
 
 function loadArchive() {
-  try { return JSON.parse(localStorage.getItem(getArchiveKey()) || "[]"); }
+  try { return JSON.parse(localStorage.getItem(SHARED_ARCHIVE_KEY) || "[]"); }
   catch { return []; }
 }
 
 function saveArchive(ids) {
-  localStorage.setItem(getArchiveKey(), JSON.stringify(ids));
+  localStorage.setItem(SHARED_ARCHIVE_KEY, JSON.stringify(ids));
 }
 
 // ═══════════════════════════════════════════════════════════════════
