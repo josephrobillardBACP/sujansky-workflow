@@ -73,6 +73,7 @@ function loadState() {
 
 function saveState(s) {
   localStorage.setItem(SHARED_CHECKLIST_KEY, JSON.stringify(s));
+  if (window.__cloud?.saveChecklistToCloud) window.__cloud.saveChecklistToCloud(s);
 }
 
 function loadArchive() {
@@ -82,6 +83,7 @@ function loadArchive() {
 
 function saveArchive(ids) {
   localStorage.setItem(SHARED_ARCHIVE_KEY, JSON.stringify(ids));
+  if (window.__cloud?.saveArchiveToCloud) window.__cloud.saveArchiveToCloud(ids);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -774,6 +776,16 @@ async function init() {
 
 document.getElementById("switch-practice-btn").addEventListener("click", showPicker);
 
+// Re-render when the cloud pushes a change from another device.
+window.addEventListener("cloud-sync-change", async () => {
+  if (!activePractice) return;
+  // Merge fresh manual patients + latest checklist/archive state into the current view.
+  const fetched = patients.filter(p => !p.isManual);
+  const manualPatients = loadManualPatientsForActivePractice();
+  patients = fetched.concat(manualPatients);
+  renderPatients();
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // MANUAL PATIENTS (created via the "Create New Patient" modal)
 // ═══════════════════════════════════════════════════════════════════
@@ -823,6 +835,9 @@ function saveManualPatientToPractice(practiceId, patient) {
   })();
   list.push(patient);
   localStorage.setItem(key, JSON.stringify(list));
+  if (window.__cloud?.saveManualPatientToCloud) {
+    window.__cloud.saveManualPatientToCloud(practiceId, patient);
+  }
 }
 
 function generateManualPatientId(practiceId, name) {

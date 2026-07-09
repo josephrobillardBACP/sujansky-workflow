@@ -791,6 +791,8 @@
     .item-row, .kit-row { grid-template-columns: 1fr; }
   }
 </style>
+<script type="module" src="firebase-init.js?v=14"></script>
+<script type="module" src="firestore-sync.js?v=14"></script>
 </head>
 <body>
 <div class="page-wrap">
@@ -1032,6 +1034,9 @@
 
   function saveRecords() {
     window.localStorage.setItem(storageKey, JSON.stringify(records));
+    if (window.__cloud?.saveTravelKitsToCloud) {
+      window.__cloud.saveTravelKitsToCloud(records);
+    }
   }
 
   function getEditableIds() {
