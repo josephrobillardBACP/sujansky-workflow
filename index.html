@@ -8,12 +8,13 @@
 </head>
 <body>
 
-  <!-- Auth gate — sign in with Google before anything else -->
+  <!-- Auth gate — sign in with Google OR email link before anything else -->
   <div id="auth-gate" class="auth-gate">
     <div class="auth-card">
       <p class="eyebrow">Concierge Travel Medicine</p>
       <h1 class="auth-title">Travel Medicine Workflow</h1>
-      <p class="auth-subtitle">Sign in with your Blue Angel or physician account to continue.</p>
+      <p class="auth-subtitle">Sign in to continue.</p>
+
       <button id="auth-signin-btn" class="auth-signin-btn" type="button">
         <svg class="auth-google-icon" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -23,10 +24,25 @@
         </svg>
         Sign in with Google
       </button>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <p class="auth-email-hint">Physicians: sign in with your practice email — we'll send a one-time link.</p>
+      <div class="auth-email-row">
+        <input
+          id="auth-email-input"
+          class="auth-email-input"
+          type="email"
+          placeholder="you@yourpractice.com"
+          autocomplete="email"
+          inputmode="email"
+        />
+        <button id="auth-email-link-btn" class="auth-email-link-btn" type="button">Send sign-in link</button>
+      </div>
+
       <p id="auth-status" class="auth-status"></p>
+      <p id="auth-success" class="auth-success" style="display:none"></p>
       <p id="auth-error" class="auth-error" style="display:none"></p>
-      <p id="auth-user-email" class="auth-user-email" style="display:none"></p>
-      <button id="auth-signout-btn" class="auth-signout-btn" type="button" style="display:none">Sign out</button>
     </div>
   </div>
 
@@ -126,12 +142,12 @@
     </div>
   </div>
 
-  <script type="module" src="firebase-init.js?v=14"></script>
-  <script type="module" src="auth-gate.js?v=14"></script>
-  <script type="module" src="firestore-sync.js?v=14"></script>
-  <script src="workflow-data.js?v=14"></script>
-  <script src="daniher-workflow-data.js?v=14"></script>
-  <script src="staff-workflow-data.js?v=14"></script>
-  <script src="app.js?v=14"></script>
+  <script type="module" src="firebase-init.js?v=15"></script>
+  <script type="module" src="auth-gate.js?v=15"></script>
+  <script type="module" src="firestore-sync.js?v=15"></script>
+  <script src="workflow-data.js?v=15"></script>
+  <script src="daniher-workflow-data.js?v=15"></script>
+  <script src="staff-workflow-data.js?v=15"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

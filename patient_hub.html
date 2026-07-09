@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Hub</title>
+  <script type="module" src="firebase-init.js?v=15"></script>
+  <script type="module" src="firestore-sync.js?v=15"></script>
   <style>
     :root {
       --bg: #f0f4f8;
@@ -276,6 +278,11 @@
 
     <div class="hub-card">
       <div class="hub-toolbar">
+        <div class="hub-filters" id="hubStatusFilters">
+          <button class="filter-button active" type="button" data-status="in-progress">In Progress</button>
+          <button class="filter-button" type="button" data-status="archived">Archived</button>
+          <button class="filter-button" type="button" data-status="all">All</button>
+        </div>
         <div class="hub-filters" id="hubFilters" hidden>
           <button class="filter-button active" type="button" data-filter="all">All</button>
           <button class="filter-button" type="button" data-filter="sujansky">Sujansky</button>
@@ -303,8 +310,21 @@
     const hubState = document.getElementById("hubState");
     const patientGrid = document.getElementById("patientGrid");
     const hubFilters = document.getElementById("hubFilters");
+    const hubStatusFilters = document.getElementById("hubStatusFilters");
     let activeFilter = "all";
+    let activeStatusFilter = "in-progress"; // in-progress | archived | all
     let loadedPatients = [];
+
+    const SHARED_ARCHIVE_KEY = "travelMedicineArchiveState_v3";
+    function manualPatientsKey(practiceId) { return `manual-patients-${practiceId}`; }
+    function loadArchivedIds() {
+      try { return new Set(JSON.parse(window.localStorage.getItem(SHARED_ARCHIVE_KEY) || "[]")); }
+      catch { return new Set(); }
+    }
+    function loadManualPatients(practiceId) {
+      try { return JSON.parse(window.localStorage.getItem(manualPatientsKey(practiceId)) || "[]"); }
+      catch { return []; }
+    }
 
     const practiceLabels = {
       staff: "All Practices",
@@ -390,14 +410,38 @@
         });
       });
 
+      // Merge locally-created (manual) patients from every fetched source
+      filteredSources.forEach((source) => {
+        loadManualPatients(source.id).forEach((patient) => {
+          loaded.push({
+            ...patient,
+            sourceId: source.id,
+            practice: source.label,
+            isManual: true,
+          });
+        });
+      });
+
       return loaded.sort((left, right) => left.name.localeCompare(right.name));
     }
 
     function getVisiblePatients() {
-      if (currentView !== "staff" || activeFilter === "all") {
-        return loadedPatients;
+      const archived = loadArchivedIds();
+      let list = loadedPatients;
+
+      // Practice filter (only shown in staff view)
+      if (currentView === "staff" && activeFilter !== "all") {
+        list = list.filter((patient) => patient.sourceId === activeFilter);
       }
-      return loadedPatients.filter((patient) => patient.sourceId === activeFilter);
+
+      // Status filter
+      if (activeStatusFilter === "in-progress") {
+        list = list.filter((patient) => !archived.has(patient.id));
+      } else if (activeStatusFilter === "archived") {
+        list = list.filter((patient) => archived.has(patient.id));
+      }
+
+      return list;
     }
 
     function renderPatients() {
@@ -458,6 +502,43 @@
       } else {
         hubFilters.remove();
       }
+
+      // Status filter (In Progress / Archived / All) — shown in every view
+      hubStatusFilters.querySelectorAll(".filter-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeStatusFilter = button.dataset.status || "in-progress";
+          hubStatusFilters.querySelectorAll(".filter-button").forEach((item) => {
+            item.classList.toggle("active", item === button);
+          });
+          renderPatients();
+        });
+      });
+
+      // Re-render whenever the cloud pushes a change (archives, manual patients, etc.)
+      window.addEventListener("cloud-sync-change", () => {
+        // Reload manual patients (Google Form patients don't change without a page refresh)
+        const manualBySource = new Set();
+        const sourcesForView = window.__workflowDataSources
+          ? Object.values(window.__workflowDataSources).filter((s) =>
+              currentView === "staff" ? true : s.id === practiceParam
+            )
+          : [];
+        // Rebuild loadedPatients: keep non-manual, re-read manual from localStorage
+        const nonManual = loadedPatients.filter((p) => !p.isManual);
+        const rebuilt = [...nonManual];
+        sourcesForView.forEach((source) => {
+          loadManualPatients(source.id).forEach((patient) => {
+            rebuilt.push({
+              ...patient,
+              sourceId: source.id,
+              practice: source.label,
+              isManual: true,
+            });
+          });
+        });
+        loadedPatients = rebuilt.sort((a, b) => a.name.localeCompare(b.name));
+        renderPatients();
+      });
 
       try {
         loadedPatients = await loadPatients();
