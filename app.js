@@ -299,6 +299,7 @@ function getFilteredSorted() {
 }
 
 function sourceChip(p) {
+  if (!activePractice?.isStaff) return "";
   if (!p.sourceId) return "";
   return `<span class="chip source-chip source-${p.sourceId}">${p.practice} Workflow</span>`;
 }
@@ -370,7 +371,7 @@ function renderPatients() {
     const isComplete = prog.done === prog.total;
     const n          = p.numCountries || countryCount(p.stops);
 
-    const sourceClass = p.sourceId ? ` patient-card-${p.sourceId}` : "";
+    const sourceClass = activePractice?.isStaff && p.sourceId ? ` patient-card-${p.sourceId}` : "";
     return `
 <article class="patient-card${sourceClass}" data-patient-id="${p.id}">
 
