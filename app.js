@@ -700,6 +700,10 @@ async function init() {
   try {
     patients = await activePractice.fetchPatients();
 
+    // Merge locally-created (manual) patients
+    const manualPatients = loadManualPatientsForActivePractice();
+    patients = patients.concat(manualPatients);
+
     if (activePractice.isStaff) {
       const bySource = {};
       patients.forEach(p => {
@@ -734,5 +738,216 @@ async function init() {
 }
 
 document.getElementById("switch-practice-btn").addEventListener("click", showPicker);
+
+// ═══════════════════════════════════════════════════════════════════
+// MANUAL PATIENTS (created via the "Create New Patient" modal)
+// ═══════════════════════════════════════════════════════════════════
+
+const MANUAL_STORAGE_PREFIX = "manual-patients-";
+
+function manualStorageKey(practiceId) {
+  return `${MANUAL_STORAGE_PREFIX}${practiceId}`;
+}
+
+function loadManualPatientsForPractice(practiceId) {
+  try {
+    const raw = localStorage.getItem(manualStorageKey(practiceId));
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list.map(p => decorateManualPatient(p, practiceId));
+  } catch {
+    return [];
+  }
+}
+
+function decorateManualPatient(p, practiceId) {
+  const source = window.__workflowDataSources?.[practiceId];
+  return {
+    ...p,
+    isManual: true,
+    sourceId: practiceId,
+    practice: source?.label || practiceId,
+  };
+}
+
+function loadManualPatientsForActivePractice() {
+  if (!activePractice) return [];
+  if (activePractice.isStaff) {
+    const sources = Object.values(window.__workflowDataSources || {}).filter(s => !s.isStaff);
+    return sources.flatMap(s => loadManualPatientsForPractice(s.id));
+  }
+  return loadManualPatientsForPractice(activePractice.id);
+}
+
+function saveManualPatientToPractice(practiceId, patient) {
+  const key = manualStorageKey(practiceId);
+  const list = (() => {
+    try { return JSON.parse(localStorage.getItem(key) || "[]"); }
+    catch { return []; }
+  })();
+  list.push(patient);
+  localStorage.setItem(key, JSON.stringify(list));
+}
+
+function generateManualPatientId(practiceId, name) {
+  const slug = String(name || "patient").trim().replace(/\s+/g, "-").toLowerCase();
+  const stamp = Date.now().toString(36);
+  const rand = Math.random().toString(36).slice(2, 6);
+  return `${practiceId}-manual-${slug}-${stamp}-${rand}`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CREATE PATIENT MODAL
+// ═══════════════════════════════════════════════════════════════════
+
+const cpModal          = document.getElementById("create-patient-modal");
+const cpBackdrop       = document.getElementById("cp-modal-backdrop");
+const cpCloseBtn       = document.getElementById("cp-modal-close");
+const cpCancelBtn      = document.getElementById("cp-cancel");
+const cpForm           = document.getElementById("cp-form");
+const cpNameInput      = document.getElementById("cp-name");
+const cpPhysicianField = document.getElementById("cp-physician-field");
+const cpPhysicianSelect= document.getElementById("cp-physician");
+const cpLocationsWrap  = document.getElementById("cp-locations");
+const cpAddLocationBtn = document.getElementById("cp-add-location");
+const cpNotesInput     = document.getElementById("cp-notes");
+const cpOpenBtn        = document.getElementById("create-patient-btn");
+
+function openCreatePatientModal() {
+  if (!activePractice) return;
+
+  // Reset form
+  cpForm.reset();
+  cpLocationsWrap.innerHTML = "";
+  addLocationRow();
+
+  // Physician dropdown: populate with non-staff practices
+  const sources = Object.values(window.__workflowDataSources || {}).filter(s => !s.isStaff);
+  cpPhysicianSelect.innerHTML =
+    `<option value="">Select physician…</option>` +
+    sources.map(s => `<option value="${s.id}">${s.displayName || s.label}</option>`).join("");
+
+  if (activePractice.isStaff) {
+    cpPhysicianField.style.display = "";
+    cpPhysicianSelect.disabled = false;
+    cpPhysicianSelect.required = true;
+    cpPhysicianSelect.value = "";
+  } else {
+    // Individual practice — hide the picker but still assign
+    cpPhysicianField.style.display = "none";
+    cpPhysicianSelect.value = activePractice.id;
+    cpPhysicianSelect.disabled = true;
+    cpPhysicianSelect.required = false;
+  }
+
+  cpModal.style.display = "flex";
+  setTimeout(() => cpNameInput.focus(), 20);
+}
+
+function closeCreatePatientModal() {
+  cpModal.style.display = "none";
+}
+
+function addLocationRow() {
+  const idx = cpLocationsWrap.children.length;
+  const row = document.createElement("div");
+  row.className = "cp-location";
+  row.innerHTML = `
+    <div class="cp-field">
+      <label>Country <span class="cp-req">*</span></label>
+      <input type="text" name="country" required autocomplete="off" />
+    </div>
+    <div class="cp-field">
+      <label>City / Region</label>
+      <input type="text" name="city" autocomplete="off" />
+    </div>
+    <div class="cp-field">
+      <label>Arrival <span class="cp-req">*</span></label>
+      <input type="date" name="arrival" required />
+    </div>
+    <div class="cp-field">
+      <label>Departure</label>
+      <input type="date" name="departure" />
+    </div>
+    ${idx > 0 ? `<button type="button" class="cp-location-remove" aria-label="Remove location">×</button>` : ""}
+  `;
+  cpLocationsWrap.appendChild(row);
+  const removeBtn = row.querySelector(".cp-location-remove");
+  if (removeBtn) removeBtn.addEventListener("click", () => row.remove());
+}
+
+function collectLocationsFromForm() {
+  const rows = cpLocationsWrap.querySelectorAll(".cp-location");
+  const stops = [];
+  for (const row of rows) {
+    const country   = row.querySelector('[name="country"]').value.trim();
+    const city      = row.querySelector('[name="city"]').value.trim();
+    const arrival   = row.querySelector('[name="arrival"]').value;
+    const departure = row.querySelector('[name="departure"]').value;
+    if (!country || !arrival) return null;
+    stops.push({ country, city, arrival, departure: departure || arrival });
+  }
+  return stops.length ? stops : null;
+}
+
+async function submitCreatePatientForm(event) {
+  event.preventDefault();
+
+  const name = cpNameInput.value.trim();
+  if (!name) { cpNameInput.focus(); return; }
+
+  const practiceId = activePractice.isStaff ? cpPhysicianSelect.value : activePractice.id;
+  if (!practiceId) { cpPhysicianSelect.focus(); return; }
+
+  const stops = collectLocationsFromForm();
+  if (!stops) {
+    alert("Please fill in every location's country and arrival date.");
+    return;
+  }
+
+  const notes = cpNotesInput.value.trim();
+  const lastDeparture = stops.at(-1)?.departure || stops.at(-1)?.arrival || "";
+  const today = new Date().toISOString().slice(0, 10);
+
+  const patient = {
+    id: generateManualPatientId(practiceId, name),
+    name,
+    purpose: "",
+    returnDate: lastDeparture,
+    submitted: today,
+    stops,
+    numCountries: new Set(stops.map(s => s.country)).size,
+    concerns: notes,
+    travelSelections: [],
+    isManual: true,
+  };
+
+  saveManualPatientToPractice(practiceId, patient);
+
+  // Add to in-memory list (with decoration for staff mode)
+  const decorated = decorateManualPatient(patient, practiceId);
+  patients.push(decorated);
+
+  // Keep the localStorage-lite record used elsewhere in the app up to date
+  const roster = JSON.parse(localStorage.getItem(`${practiceId}-patients-v1`) || "[]");
+  roster.push({ id: patient.id, name: patient.name, stops: patient.stops });
+  localStorage.setItem(`${practiceId}-patients-v1`, JSON.stringify(roster));
+
+  expandedId = patient.id;
+  closeCreatePatientModal();
+  renderPatients();
+}
+
+cpOpenBtn.addEventListener("click", openCreatePatientModal);
+cpCloseBtn.addEventListener("click", closeCreatePatientModal);
+cpCancelBtn.addEventListener("click", closeCreatePatientModal);
+cpBackdrop.addEventListener("click", closeCreatePatientModal);
+cpAddLocationBtn.addEventListener("click", addLocationRow);
+cpForm.addEventListener("submit", submitCreatePatientForm);
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && cpModal.style.display === "flex") closeCreatePatientModal();
+});
 
 renderPracticePicker();

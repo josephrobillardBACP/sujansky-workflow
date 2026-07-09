@@ -44,6 +44,7 @@
         oninput="onSearch()"
         autocomplete="off"
       />
+      <button id="create-patient-btn" class="create-patient-btn" type="button">+ Create New Patient</button>
     </div>
 
     <div class="practice-filters" id="practice-filters" role="tablist" aria-label="Practice filter" style="display:none"></div>
@@ -56,9 +57,50 @@
 
   </div>
 
-  <script src="workflow-data.js?v=11"></script>
-  <script src="daniher-workflow-data.js?v=11"></script>
-  <script src="staff-workflow-data.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <!-- Create Patient Modal -->
+  <div id="create-patient-modal" class="cp-modal" style="display:none">
+    <div class="cp-modal-backdrop" id="cp-modal-backdrop"></div>
+    <div class="cp-modal-card" role="dialog" aria-modal="true" aria-labelledby="cp-modal-title">
+      <div class="cp-modal-header">
+        <h2 id="cp-modal-title">Create New Patient</h2>
+        <button type="button" id="cp-modal-close" class="cp-modal-close" aria-label="Close">×</button>
+      </div>
+
+      <form id="cp-form" class="cp-form" novalidate>
+        <div class="cp-field">
+          <label for="cp-name">Patient Name <span class="cp-req">*</span></label>
+          <input type="text" id="cp-name" name="name" required autocomplete="off" />
+        </div>
+
+        <div class="cp-field" id="cp-physician-field">
+          <label for="cp-physician">Physician <span class="cp-req">*</span></label>
+          <select id="cp-physician" name="physician">
+            <option value="">Select physician…</option>
+          </select>
+        </div>
+
+        <fieldset class="cp-fieldset">
+          <legend>Travel Locations <span class="cp-req">*</span></legend>
+          <div id="cp-locations"></div>
+          <button type="button" id="cp-add-location" class="cp-add-btn">+ Add Location</button>
+        </fieldset>
+
+        <div class="cp-field">
+          <label for="cp-notes">Notes to be aware of</label>
+          <textarea id="cp-notes" name="notes" rows="3" placeholder="Any concerns, medical history, or context the team should know…"></textarea>
+        </div>
+
+        <div class="cp-actions">
+          <button type="button" id="cp-cancel" class="cp-btn cp-btn-secondary">Cancel</button>
+          <button type="submit" id="cp-submit" class="cp-btn cp-btn-primary">Create Patient</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="workflow-data.js?v=12"></script>
+  <script src="daniher-workflow-data.js?v=12"></script>
+  <script src="staff-workflow-data.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>
