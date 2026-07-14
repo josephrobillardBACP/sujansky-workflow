@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel Medicine Intake Form</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="firebase-init.js?v=17"></script>
+  <style>
+    body { background: linear-gradient(160deg, #e8edf5 0%, #f5f7fa 60%); }
+    .intake-shell {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+    .intake-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px 28px;
+      margin-bottom: 18px;
+    }
+    .intake-hero .eyebrow { color: var(--accent); }
+    .intake-hero h1 { margin: 4px 0 6px; font-size: 1.55rem; font-weight: 700; }
+    .intake-hero .practice-line { font-size: 1rem; color: var(--muted); }
+    .intake-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 26px;
+      margin-bottom: 14px;
+    }
+    .intake-section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin: 0 0 4px;
+    }
+    .intake-section-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+    .intake-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .intake-field label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .intake-required { color: var(--danger); font-weight: 700; }
+    .intake-field input,
+    .intake-field textarea,
+    .intake-field select {
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .intake-field input:focus,
+    .intake-field textarea:focus,
+    .intake-field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    }
+    .intake-field textarea { resize: vertical; min-height: 88px; }
+    .intake-row-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .intake-stop {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .intake-stop-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .intake-stop-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .intake-stop-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .intake-stop-remove:hover { color: var(--danger); }
+    .intake-add-stop-btn {
+      align-self: flex-start;
+      padding: 8px 14px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: none;
+      border: 1px dashed var(--accent);
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .intake-add-stop-btn:hover { background: #eff6ff; }
+    .intake-check-list { display: flex; flex-direction: column; gap: 10px; }
+    .intake-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .intake-check input[type="checkbox"] {
+      margin-top: 3px;
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+    }
+    .intake-submit {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .intake-submit:hover:not(:disabled) { background: #1e40af; }
+    .intake-submit:active:not(:disabled) { transform: scale(0.98); }
+    .intake-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .intake-error {
+      color: var(--danger);
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    .intake-success {
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .intake-success-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: #16a34a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 16px;
+    }
+    .intake-success h2 { margin: 0 0 8px; font-size: 1.45rem; }
+    .intake-success p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 0; }
+    .intake-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    @media (max-width: 500px) {
+      .intake-row-two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="intake-shell">
+    <div class="intake-hero">
+      <p class="eyebrow">Concierge Travel Medicine</p>
+      <h1 id="intake-title">Travel Medicine Intake</h1>
+      <p class="practice-line" id="intake-practice-line"></p>
+    </div>
+
+    <form id="intake-form" novalidate>
+      <div class="intake-card">
+        <h2 class="intake-section-title">Personal Info</h2>
+        <p class="intake-section-desc">Please share your name so we can prepare your consultation.</p>
+        <div class="intake-row-two">
+          <div class="intake-field">
+            <label for="firstName">First Name <span class="intake-required">*</span></label>
+            <input type="text" id="firstName" name="firstName" required autocomplete="given-name" />
+          </div>
+          <div class="intake-field">
+            <label for="lastName">Last Name <span class="intake-required">*</span></label>
+            <input type="text" id="lastName" name="lastName" required autocomplete="family-name" />
+          </div>
+        </div>
+      </div>
+
+      <div class="intake-card">
+        <h2 class="intake-section-title">Trip Details</h2>
+        <p class="intake-section-desc">Tell us about the purpose of your travel and the countries you plan to visit.</p>
+
+        <div class="intake-field">
+          <label for="purpose">Purpose of travel <span class="intake-required">*</span></label>
+          <input type="text" id="purpose" name="purpose" required placeholder="Business, leisure, mission work, etc." />
+        </div>
+
+        <div class="intake-field">
+          <label for="numCountries">Number of countries visiting <span class="intake-required">*</span></label>
+          <select id="numCountries" name="numCountries" required>
+            <option value="">Select…</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">More than 4</option>
+          </select>
+        </div>
+
+        <div id="intake-stops"></div>
+        <button type="button" id="intake-add-stop" class="intake-add-stop-btn">+ Add another destination</button>
+      </div>
+
+      <div class="intake-card">
+        <h2 class="intake-section-title">Final Questions</h2>
+        <p class="intake-section-desc">Select all that apply to your travel.</p>
+        <div class="intake-check-list" id="intake-checks">
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be in contact with freshwater (swimming, rafting, wading)?" />Will you be in contact with freshwater (swimming, rafting, wading)?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be in contact with wild or domestic animals?" />Will you be in contact with wild or domestic animals?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be staying in a rural area or village?" />Will you be staying in a rural area or village?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be spelunking or visiting caves?" />Will you be spelunking or visiting caves?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be traveling to or trekking at high altitude?" />Will you be traveling to or trekking at high altitude?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be eating street food or food from local vendors?" />Will you be eating street food or food from local vendors?</label>
+          <label class="intake-check"><input type="checkbox" name="check" value="Will you be seeking any medical care abroad?" />Will you be seeking any medical care abroad?</label>
+        </div>
+
+        <div class="intake-field" style="margin-top:20px;">
+          <label for="concerns">Any more details or questions surrounding your travel the office should be aware of?</label>
+          <textarea id="concerns" name="concerns" placeholder="Optional — allergies, medical history, worries, questions, etc."></textarea>
+        </div>
+      </div>
+
+      <div class="intake-card">
+        <button type="submit" id="intake-submit-btn" class="intake-submit">Submit</button>
+        <div id="intake-error" class="intake-error" style="display:none"></div>
+      </div>
+    </form>
+
+    <div id="intake-success" class="intake-success" style="display:none">
+      <div class="intake-success-icon">✓</div>
+      <h2>Thank you for your submission</h2>
+      <p>Your travel medicine intake form has been received. Our team will review your responses and reach out within the next 48 hours to schedule your consultation.</p>
+    </div>
+
+    <div class="intake-footer">Blue Angel Clinical Partners</div>
+  </div>
+
+  <script type="module">
+    import { collection, addDoc, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { db } from "./firebase-init.js";
+
+    const PRACTICE_LABELS = {
+      sujansky: "Ulrike Sujansky, M.D.",
+      daniher:  "Amy Daniher, M.D.",
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const practiceId = (params.get("practice") || "").toLowerCase();
+
+    const titleEl        = document.getElementById("intake-title");
+    const practiceLineEl = document.getElementById("intake-practice-line");
+    const form           = document.getElementById("intake-form");
+    const stopsWrap      = document.getElementById("intake-stops");
+    const addStopBtn     = document.getElementById("intake-add-stop");
+    const numCountriesEl = document.getElementById("numCountries");
+    const submitBtn      = document.getElementById("intake-submit-btn");
+    const errorEl        = document.getElementById("intake-error");
+    const successEl      = document.getElementById("intake-success");
+
+    if (!(practiceId in PRACTICE_LABELS)) {
+      practiceLineEl.textContent = "";
+      titleEl.textContent = "Travel Medicine Intake";
+      form.style.display = "none";
+      errorEl.style.display = "block";
+      errorEl.textContent = "This intake form was opened without a valid practice. Please use the link provided by the office.";
+    } else {
+      titleEl.textContent = `Travel Medicine Intake — ${PRACTICE_LABELS[practiceId]}`;
+      practiceLineEl.textContent = `Please complete this form ahead of your consultation with ${PRACTICE_LABELS[practiceId]}.`;
+    }
+
+    function makeStop(idx) {
+      const wrap = document.createElement("div");
+      wrap.className = "intake-stop";
+      wrap.innerHTML = `
+        <div class="intake-stop-header">
+          <div class="intake-stop-title">Destination ${idx + 1}</div>
+          ${idx > 0 ? `<button type="button" class="intake-stop-remove" data-remove="1">Remove</button>` : ""}
+        </div>
+        <div class="intake-field">
+          <label>Country <span class="intake-required">*</span></label>
+          <input type="text" name="country" required autocomplete="off" />
+        </div>
+        <div class="intake-field">
+          <label>City / Region</label>
+          <input type="text" name="city" autocomplete="off" placeholder="Optional" />
+        </div>
+        <div class="intake-row-two">
+          <div class="intake-field">
+            <label>Arrival date <span class="intake-required">*</span></label>
+            <input type="date" name="arrival" required />
+          </div>
+          <div class="intake-field">
+            <label>Departure date <span class="intake-required">*</span></label>
+            <input type="date" name="departure" required />
+          </div>
+        </div>
+      `;
+      const removeBtn = wrap.querySelector("[data-remove]");
+      if (removeBtn) removeBtn.addEventListener("click", () => {
+        wrap.remove();
+        renumberStops();
+      });
+      return wrap;
+    }
+
+    function renumberStops() {
+      stopsWrap.querySelectorAll(".intake-stop").forEach((el, i) => {
+        el.querySelector(".intake-stop-title").textContent = `Destination ${i + 1}`;
+      });
+    }
+
+    function ensureStopCount(count) {
+      while (stopsWrap.children.length < count) {
+        stopsWrap.appendChild(makeStop(stopsWrap.children.length));
+      }
+    }
+
+    // Start with 1 destination visible
+    ensureStopCount(1);
+
+    // When user picks a country count, auto-add rows up to that number
+    numCountriesEl.addEventListener("change", () => {
+      const n = parseInt(numCountriesEl.value, 10);
+      if (!isNaN(n) && n > 0) ensureStopCount(n);
+    });
+
+    addStopBtn.addEventListener("click", () => {
+      ensureStopCount(stopsWrap.children.length + 1);
+    });
+
+    function collectStops() {
+      const stops = [];
+      for (const el of stopsWrap.querySelectorAll(".intake-stop")) {
+        const country   = el.querySelector('[name="country"]').value.trim();
+        const city      = el.querySelector('[name="city"]').value.trim();
+        const arrival   = el.querySelector('[name="arrival"]').value;
+        const departure = el.querySelector('[name="departure"]').value;
+        if (!country || !arrival || !departure) return null;
+        stops.push({ country, city, arrival, departure });
+      }
+      return stops;
+    }
+
+    function collectTravelSelections() {
+      return [...document.querySelectorAll('#intake-checks input[type="checkbox"]:checked')]
+        .map(el => el.value);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.style.display = "none";
+
+      const firstName = document.getElementById("firstName").value.trim();
+      const lastName  = document.getElementById("lastName").value.trim();
+      const purpose   = document.getElementById("purpose").value.trim();
+      const numCountries = parseInt(numCountriesEl.value, 10);
+      const stops = collectStops();
+      const travelSelections = collectTravelSelections();
+      const concerns = document.getElementById("concerns").value.trim();
+
+      if (!firstName || !lastName || !purpose || isNaN(numCountries) || !stops || !stops.length) {
+        errorEl.textContent = "Please fill in all required fields and add at least one destination.";
+        errorEl.style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
+      const returnDate = stops.at(-1)?.departure || "";
+      const submission = {
+        practiceId,
+        name: `${firstName} ${lastName}`,
+        firstName,
+        lastName,
+        purpose,
+        numCountries,
+        stops,
+        travelSelections,
+        concerns,
+        returnDate,
+        submittedAt: serverTimestamp(),
+      };
+
+      try {
+        await addDoc(collection(db, "intakeSubmissions"), submission);
+        form.style.display = "none";
+        successEl.style.display = "block";
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        errorEl.textContent = `We couldn't submit your form: ${err?.message || err}. Please try again or contact the office.`;
+        errorEl.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -14,6 +14,9 @@ import {
   setDoc,
   deleteDoc,
   onSnapshot,
+  query,
+  where,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { auth, db } from "./firebase-init.js";
@@ -206,12 +209,41 @@ async function seedFromLocalIfEmpty() {
 // Bootstrap on auth
 // ══════════════════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════════════════
+// Read: intake submissions (used by workflow-data.js / daniher-workflow-data.js)
+// ══════════════════════════════════════════════════════════════════
+
+async function fetchIntakeSubmissions(practiceId) {
+  const q = query(collection(db, "intakeSubmissions"), where("practiceId", "==", practiceId));
+  const snap = await getDocs(q);
+  const patients = [];
+  snap.forEach((docSnap) => {
+    const d = docSnap.data();
+    const submitted = d.submittedAt?.toDate
+      ? d.submittedAt.toDate().toISOString().slice(0, 10)
+      : "";
+    patients.push({
+      id: `${practiceId}-firestore-${docSnap.id}`,
+      name: d.name || `${d.firstName || ""} ${d.lastName || ""}`.trim() || "Unknown patient",
+      purpose: d.purpose || "",
+      returnDate: d.returnDate || (d.stops?.at(-1)?.departure || ""),
+      submitted,
+      stops: Array.isArray(d.stops) ? d.stops : [],
+      numCountries: d.numCountries || (Array.isArray(d.stops) ? d.stops.length : 1),
+      concerns: d.concerns || "",
+      travelSelections: Array.isArray(d.travelSelections) ? d.travelSelections : [],
+    });
+  });
+  return patients;
+}
+
 window.__cloud = {
   saveArchiveToCloud,
   saveChecklistToCloud,
   saveTravelKitsToCloud,
   saveManualPatientToCloud,
   deleteManualPatientFromCloud,
+  fetchIntakeSubmissions,
 };
 
 let started = false;

@@ -158,13 +158,13 @@
     });
   }
 
-  function fetchPatients() {
+  function fetchFromSheet() {
     return new Promise((resolve, reject) => {
       const callbackName = `__workflow_${PRACTICE_ID}_${Date.now()}`;
       const script = document.createElement("script");
       const timer = setTimeout(() => {
         cleanup();
-        reject(new Error(`${PRACTICE_LABEL} request timed out`));
+        reject(new Error(`${PRACTICE_LABEL} sheet request timed out`));
       }, 10000);
 
       function cleanup() {
@@ -176,7 +176,7 @@
       window[callbackName] = function(data) {
         cleanup();
         if (!data?.table) {
-          reject(new Error(`${PRACTICE_LABEL} returned an unexpected response`));
+          reject(new Error(`${PRACTICE_LABEL} sheet returned an unexpected response`));
           return;
         }
         resolve(parseSheetRows(data.table));
@@ -184,11 +184,26 @@
 
       script.onerror = () => {
         cleanup();
-        reject(new Error(`Could not load ${PRACTICE_LABEL} workflow data`));
+        reject(new Error(`Could not load ${PRACTICE_LABEL} sheet data`));
       };
       script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${callbackName}&gid=${SHEET_GID}`;
       document.head.appendChild(script);
     });
+  }
+
+  async function fetchPatients() {
+    const [sheetResult, firestoreResult] = await Promise.allSettled([
+      fetchFromSheet(),
+      window.__cloud?.fetchIntakeSubmissions
+        ? window.__cloud.fetchIntakeSubmissions(PRACTICE_ID)
+        : Promise.resolve([]),
+    ]);
+    const sheetPatients     = sheetResult.status     === "fulfilled" ? sheetResult.value     : [];
+    const firestorePatients = firestoreResult.status === "fulfilled" ? firestoreResult.value : [];
+    if (sheetResult.status === "rejected" && firestoreResult.status === "rejected") {
+      throw sheetResult.reason;
+    }
+    return [...sheetPatients, ...firestorePatients];
   }
 
   window.__workflowDataSources = window.__workflowDataSources || {};
