@@ -369,6 +369,14 @@ function renderItinerary(p) {
         </tbody>
       </table>
       <div class="itinerary-facts">
+        ${(p.email || p.phone) ? `
+          <div class="fact-card fact-card-wide">
+            <span class="fact-label">Contact</span>
+            <div class="contact-info-list">
+              ${p.email ? `<a class="contact-info-item" href="mailto:${escapeHtml(p.email)}">✉ ${escapeHtml(p.email)}</a>` : ""}
+              ${p.phone ? `<a class="contact-info-item" href="tel:${escapeHtml(p.phone.replace(/[^\d+]/g, ''))}">☎ ${escapeHtml(p.phone)}</a>` : ""}
+            </div>
+          </div>` : ""}
         ${selections.length ? `
           <div class="fact-card fact-card-wide">
             <span class="fact-label">Select all that apply</span>

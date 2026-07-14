@@ -225,6 +225,8 @@ async function fetchIntakeSubmissions(practiceId) {
     patients.push({
       id: `${practiceId}-firestore-${docSnap.id}`,
       name: d.name || `${d.firstName || ""} ${d.lastName || ""}`.trim() || "Unknown patient",
+      email: d.email || "",
+      phone: d.phone || "",
       purpose: d.purpose || "",
       returnDate: d.returnDate || (d.stops?.at(-1)?.departure || ""),
       submitted,
