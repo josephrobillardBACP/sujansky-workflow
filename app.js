@@ -4,7 +4,7 @@
 
 const CHECKLIST = [
   {
-    html: `Enter patient in <a class="checklist-link" href="https://www.travax.com/" target="_blank" rel="noopener noreferrer">Travax</a> and generate report`,
+    html: `Enter patient in <a class="checklist-link" href="https://travelcare.com/" target="_blank" rel="noopener noreferrer">TravelCare</a> and generate report`,
   },
   { text: "Determine and order recommended vaccines" },
   { text: "Schedule patient appointment for pre-travel consultation and vaccine administration",
