@@ -31,6 +31,16 @@ function isAllowed(email) {
   return ALLOWED_DOMAINS.map(d => d.toLowerCase()).includes(domain);
 }
 
+// Email-link sign-in is intentionally stricter than the general allowlist:
+// only exact-match emails (not the domain wildcard) can request a magic link.
+// Blue Angel Workspace users have Google accounts, so they should use the
+// Google button. This prevents someone from typing any @blueangelclinical.com
+// address and having a link mailed to whoever owns that alias.
+function isAllowedForEmailLink(email) {
+  if (!email) return false;
+  return ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
+}
+
 const EMAIL_STORAGE_KEY = "authEmailForLink";
 
 // ── DOM references ───────────────────────────────────────────────
@@ -110,8 +120,9 @@ async function handleEmailLinkSubmit() {
     return;
   }
 
-  if (!isAllowed(email)) {
-    authError.textContent = `${email} is not authorized to access this workflow. Contact the office administrator to be added.`;
+  if (!isAllowedForEmailLink(email)) {
+    // Deliberately vague message so we don't leak which addresses ARE on the list.
+    authError.textContent = `Email sign-in isn't available for this address. If you're a Blue Angel staff member, use the "Sign in with Google" button above.`;
     authError.style.display = "block";
     return;
   }
