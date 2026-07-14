@@ -389,6 +389,11 @@ function renderItinerary(p) {
             <span class="fact-label">Any more details or questions surrounding your travel the office should be aware of?</span>
             <div class="travel-comments-copy">${escapeHtml(comments).replace(/\r?\n/g, "<br />")}</div>
           </div>` : ""}
+        ${p.purpose ? `
+          <div class="fact-card">
+            <span class="fact-label">Purpose of travel</span>
+            <span class="fact-value">${escapeHtml(p.purpose)}</span>
+          </div>` : ""}
         ${p.returnDate ? `
           <div class="fact-card">
             <span class="fact-label">Return date</span>

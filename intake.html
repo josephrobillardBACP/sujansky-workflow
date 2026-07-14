@@ -191,7 +191,6 @@
 <body>
   <div class="intake-shell">
     <div class="intake-hero">
-      <p class="eyebrow">Concierge Travel Medicine</p>
       <h1 id="intake-title">Travel Medicine Intake</h1>
       <p class="practice-line" id="intake-practice-line"></p>
     </div>
@@ -231,18 +230,6 @@
           <input type="text" id="purpose" name="purpose" required placeholder="Business, leisure, mission work, etc." />
         </div>
 
-        <div class="intake-field">
-          <label for="numCountries">Number of countries visiting <span class="intake-required">*</span></label>
-          <select id="numCountries" name="numCountries" required>
-            <option value="">Select…</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">More than 4</option>
-          </select>
-        </div>
-
         <div id="intake-stops"></div>
         <button type="button" id="intake-add-stop" class="intake-add-stop-btn">+ Add another destination</button>
       </div>
@@ -275,10 +262,9 @@
     <div id="intake-success" class="intake-success" style="display:none">
       <div class="intake-success-icon">✓</div>
       <h2>Thank you for your submission</h2>
-      <p>Your travel medicine intake form has been received. Our team will review your responses and reach out within the next 48 hours to schedule your consultation.</p>
+      <p>Your submission has been captured. The front office staff will reach out shortly to schedule you for an appointment.</p>
     </div>
 
-    <div class="intake-footer">Blue Angel Clinical Partners</div>
   </div>
 
   <!-- Country type-ahead options (used by every destination row) -->
@@ -365,12 +351,19 @@
     const params = new URLSearchParams(window.location.search);
     const practiceId = (params.get("practice") || "").toLowerCase();
 
+    // Web3Forms access keys — one per practice, each pointing at that
+    // practice's front-office inbox. Replace the placeholders below with
+    // the actual keys after creating them in the Web3Forms dashboard.
+    const INTAKE_EMAIL_KEYS = {
+      sujansky: "TODO_SUJANSKY_FRONT_OFFICE_KEY",
+      daniher:  "TODO_DANIHER_FRONT_OFFICE_KEY",
+    };
+
     const titleEl        = document.getElementById("intake-title");
     const practiceLineEl = document.getElementById("intake-practice-line");
     const form           = document.getElementById("intake-form");
     const stopsWrap      = document.getElementById("intake-stops");
     const addStopBtn     = document.getElementById("intake-add-stop");
-    const numCountriesEl = document.getElementById("numCountries");
     const submitBtn      = document.getElementById("intake-submit-btn");
     const errorEl        = document.getElementById("intake-error");
     const successEl      = document.getElementById("intake-success");
@@ -436,12 +429,6 @@
     // Start with 1 destination visible
     ensureStopCount(1);
 
-    // When user picks a country count, auto-add rows up to that number
-    numCountriesEl.addEventListener("change", () => {
-      const n = parseInt(numCountriesEl.value, 10);
-      if (!isNaN(n) && n > 0) ensureStopCount(n);
-    });
-
     addStopBtn.addEventListener("click", () => {
       ensureStopCount(stopsWrap.children.length + 1);
     });
@@ -473,17 +460,18 @@
       const email     = document.getElementById("email").value.trim();
       const phone     = document.getElementById("phone").value.trim();
       const purpose   = document.getElementById("purpose").value.trim();
-      const numCountries = parseInt(numCountriesEl.value, 10);
       const stops = collectStops();
       const travelSelections = collectTravelSelections();
       const concerns = document.getElementById("concerns").value.trim();
 
-      if (!firstName || !lastName || !email || !phone || !purpose || isNaN(numCountries) || !stops || !stops.length) {
+      if (!firstName || !lastName || !email || !phone || !purpose || !stops || !stops.length) {
         errorEl.textContent = "Please fill in all required fields and add at least one destination.";
         errorEl.style.display = "block";
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
+
+      const numCountries = new Set(stops.map(s => s.country)).size;
 
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailPattern.test(email)) {
@@ -525,6 +513,11 @@
         await addDoc(collection(db, "intakeSubmissions"), submission);
         form.style.display = "none";
         successEl.style.display = "block";
+        // Fire-and-forget notification email to the front office. Never block
+        // the success screen on this — Firestore already has the data.
+        notifyFrontOffice(submission).catch(err =>
+          console.warn("Front office notification failed:", err)
+        );
       } catch (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit";
@@ -532,6 +525,56 @@
         errorEl.style.display = "block";
       }
     });
+
+    async function notifyFrontOffice(sub) {
+      const key = INTAKE_EMAIL_KEYS[sub.practiceId];
+      if (!key || key.startsWith("TODO_")) {
+        console.info("Skipping front-office email: no Web3Forms key configured for", sub.practiceId);
+        return;
+      }
+      const stopsText = sub.stops
+        .map((s, i) => `  ${i + 1}. ${s.country}${s.city ? ` — ${s.city}` : ""}  (${s.arrival} → ${s.departure})`)
+        .join("\n");
+      const flagsText = sub.travelSelections.length
+        ? sub.travelSelections.map(f => `  • ${f}`).join("\n")
+        : "  (none selected)";
+      const body = [
+        `New Travel Medicine Intake Submission`,
+        `Practice: ${PRACTICE_LABELS[sub.practiceId]}`,
+        ``,
+        `Patient: ${sub.name}`,
+        `Email:   ${sub.email}`,
+        `Phone:   ${sub.phone}`,
+        ``,
+        `Purpose of travel: ${sub.purpose}`,
+        `Countries visited: ${sub.numCountries}`,
+        ``,
+        `Itinerary:`,
+        stopsText,
+        ``,
+        `Travel flags:`,
+        flagsText,
+        ``,
+        `Additional details:`,
+        sub.concerns ? `  ${sub.concerns}` : "  (none)",
+      ].join("\n");
+
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: key,
+          subject: `[${PRACTICE_LABELS[sub.practiceId]}] New Travel Medicine Intake — ${sub.name}`,
+          from_name: `${PRACTICE_LABELS[sub.practiceId]} Intake Form`,
+          replyto: sub.email,
+          email: sub.email,
+          patient_name: sub.name,
+          patient_email: sub.email,
+          patient_phone: sub.phone,
+          message: body,
+        }),
+      });
+    }
   </script>
 </body>
 </html>
