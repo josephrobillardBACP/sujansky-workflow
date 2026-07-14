@@ -529,7 +529,7 @@
     async function notifyFrontOffice(sub) {
       const key = INTAKE_EMAIL_KEYS[sub.practiceId];
       if (!key || key.startsWith("TODO_")) {
-        console.info("Skipping front-office email: no Web3Forms key configured for", sub.practiceId);
+        console.warn("Skipping front-office email: no Web3Forms key configured for", sub.practiceId);
         return;
       }
       const stopsText = sub.stops
@@ -559,21 +559,39 @@
         sub.concerns ? `  ${sub.concerns}` : "  (none)",
       ].join("\n");
 
-      await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: key,
-          subject: `[${PRACTICE_LABELS[sub.practiceId]}] New Travel Medicine Intake — ${sub.name}`,
-          from_name: `${PRACTICE_LABELS[sub.practiceId]} Intake Form`,
-          replyto: sub.email,
-          email: sub.email,
-          patient_name: sub.name,
-          patient_email: sub.email,
-          patient_phone: sub.phone,
-          message: body,
-        }),
-      });
+      const payload = {
+        access_key: key,
+        subject: `[${PRACTICE_LABELS[sub.practiceId]}] New Travel Medicine Intake — ${sub.name}`,
+        from_name: `${PRACTICE_LABELS[sub.practiceId]} Intake Form`,
+        replyto: sub.email,
+        email: sub.email,
+        patient_name: sub.name,
+        patient_email: sub.email,
+        patient_phone: sub.phone,
+        message: body,
+      };
+
+      console.info("[intake] Sending front-office notification…", { practiceId: sub.practiceId, subject: payload.subject });
+
+      let response, result;
+      try {
+        response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        result = await response.json().catch(() => null);
+      } catch (netErr) {
+        console.error("[intake] Web3Forms network error:", netErr);
+        throw netErr;
+      }
+
+      if (!response.ok || !result?.success) {
+        console.error("[intake] Web3Forms rejected the submission:", response.status, result);
+        throw new Error(result?.message || `Web3Forms returned HTTP ${response.status}`);
+      }
+
+      console.info("[intake] Front-office notification sent successfully.", result);
     }
   </script>
 </body>
