@@ -14,7 +14,8 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { auth } from "./firebase-init.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { auth, db } from "./firebase-init.js";
 
 // ── Allowlist ────────────────────────────────────────────────────
 const ALLOWED_DOMAINS = ["blueangelclinical.com"];
@@ -23,7 +24,7 @@ const ALLOWED_EMAILS  = [
   "doctor@sujanskymd.com",
 ];
 
-function isAllowed(email) {
+function checkHardcoded(email) {
   if (!email) return false;
   const lower = email.toLowerCase();
   if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(lower)) return true;
@@ -31,14 +32,49 @@ function isAllowed(email) {
   return ALLOWED_DOMAINS.map(d => d.toLowerCase()).includes(domain);
 }
 
+// Cache the dynamic allowlist so repeated calls in one session are cheap.
+let dynamicAllowlistCache = null;
+async function fetchDynamicAllowlist() {
+  if (dynamicAllowlistCache) return dynamicAllowlistCache;
+  try {
+    const snap = await getDoc(doc(db, "admin", "allowlist"));
+    if (snap.exists()) {
+      const data = snap.data();
+      dynamicAllowlistCache = {
+        emails:  (data.emails  || []).map(e => e.toLowerCase()),
+        domains: (data.domains || []).map(d => d.toLowerCase()),
+      };
+    } else {
+      dynamicAllowlistCache = { emails: [], domains: [] };
+    }
+  } catch (err) {
+    console.warn("Could not fetch dynamic allowlist:", err);
+    dynamicAllowlistCache = { emails: [], domains: [] };
+  }
+  return dynamicAllowlistCache;
+}
+
+async function isAllowed(email) {
+  if (!email) return false;
+  if (checkHardcoded(email)) return true;
+  const lower = email.toLowerCase();
+  const domain = lower.split("@")[1];
+  const dyn = await fetchDynamicAllowlist();
+  return dyn.emails.includes(lower) || dyn.domains.includes(domain);
+}
+
 // Email-link sign-in is intentionally stricter than the general allowlist:
 // only exact-match emails (not the domain wildcard) can request a magic link.
 // Blue Angel Workspace users have Google accounts, so they should use the
 // Google button. This prevents someone from typing any @blueangelclinical.com
 // address and having a link mailed to whoever owns that alias.
-function isAllowedForEmailLink(email) {
+async function isAllowedForEmailLink(email) {
   if (!email) return false;
-  return ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase());
+  const lower = email.toLowerCase();
+  if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(lower)) return true;
+  // Also allow any specific email added via the admin page (but not domains).
+  const dyn = await fetchDynamicAllowlist();
+  return dyn.emails.includes(lower);
 }
 
 const EMAIL_STORAGE_KEY = "authEmailForLink";
@@ -120,7 +156,7 @@ async function handleEmailLinkSubmit() {
     return;
   }
 
-  if (!isAllowedForEmailLink(email)) {
+  if (!(await isAllowedForEmailLink(email))) {
     // Deliberately vague message so we don't leak which addresses ARE on the list.
     authError.textContent = `Email sign-in isn't available for this address. If you're a Blue Angel staff member, use the "Sign in with Google" button above.`;
     authError.style.display = "block";
@@ -198,7 +234,7 @@ onAuthStateChanged(auth, async (user) => {
 
   const email = (user.email || "").toLowerCase();
 
-  if (!isAllowed(email)) {
+  if (!(await isAllowed(email))) {
     pendingDenialMessage = `${email} is not authorized to access this workflow. Contact the office administrator to be added.`;
     try { await signOut(auth); } catch {}
     return;
