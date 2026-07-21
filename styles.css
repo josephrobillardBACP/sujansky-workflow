@@ -1788,6 +1788,26 @@ body {
   box-shadow: 0 2px 10px rgba(29, 78, 216, 0.1);
 }
 
+.picker-admin-link {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.picker-admin-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* ── Switch practice button ─────────────────────────── */
 .switch-practice-btn {
   font-size: 0.78rem;
