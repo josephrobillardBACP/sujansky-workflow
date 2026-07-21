@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Travel Medicine Workflow</title>
-  <link rel="stylesheet" href="styles.css?v=20" />
+  <link rel="stylesheet" href="styles.css?v=21" />
 </head>
 <body>
 
@@ -37,105 +37,70 @@
       </div>
     </header>
 
+    <!-- ADD USER — at the top -->
     <section class="admin-section">
-      <h2>Who can access the workflow</h2>
-      <p class="admin-note">Every allowed user can also read/write patient data (per Firestore rules). Only <code>joseph@blueangelclinical.com</code> can modify this list.</p>
-
-      <div class="admin-columns">
-        <div class="admin-column">
-          <h3>System users (permanent)</h3>
-          <p class="admin-column-note">Baked into the app for safety. Cannot be removed from this page.</p>
-          <ul class="admin-list admin-list-locked" id="admin-hardcoded-list"></ul>
-        </div>
-
-        <div class="admin-column">
-          <h3>Managed users</h3>
-          <p class="admin-column-note">Add or remove people here anytime. Changes take effect immediately.</p>
-          <ul class="admin-list" id="admin-dynamic-list"></ul>
-        </div>
-      </div>
+      <h2>Add a user</h2>
+      <p class="admin-note">Enter an email and pick which practice views they can access. Changes take effect the next time they sign in.</p>
 
       <form id="admin-add-form" class="admin-add-form">
-        <div class="admin-add-row">
-          <select id="admin-add-kind" class="admin-add-kind">
-            <option value="email">Email</option>
-            <option value="domain">Domain (e.g. example.com)</option>
-          </select>
-          <input
-            id="admin-add-input"
-            type="text"
-            class="admin-add-input"
-            placeholder="new-user@example.com"
-            autocomplete="off"
-          />
-          <button type="submit" class="admin-btn admin-btn-primary">Add</button>
+        <div class="admin-add-grid">
+          <div class="admin-field">
+            <label for="admin-add-input">Email address</label>
+            <input
+              id="admin-add-input"
+              type="email"
+              class="admin-add-input"
+              placeholder="rika@example.com"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <div class="admin-field">
+            <label>Practice access</label>
+            <div class="admin-access-checkboxes" id="admin-add-access">
+              <label class="admin-check"><input type="checkbox" value="sujansky" /> Sujansky</label>
+              <label class="admin-check"><input type="checkbox" value="daniher" /> Daniher</label>
+              <label class="admin-check"><input type="checkbox" value="staff" /> Staff view</label>
+            </div>
+          </div>
+        </div>
+        <div class="admin-add-actions">
+          <button type="submit" class="admin-btn admin-btn-primary">Add user</button>
         </div>
         <p id="admin-status" class="admin-status" style="display:none"></p>
         <p id="admin-error" class="admin-error" style="display:none"></p>
       </form>
     </section>
+
+    <!-- MANAGED USERS list -->
+    <section class="admin-section">
+      <h2>Managed users</h2>
+      <p class="admin-note">Toggle a user's practice access with the checkboxes — changes save automatically. Click Remove to revoke access entirely.</p>
+      <ul class="admin-list" id="admin-users-list"></ul>
+    </section>
   </div>
 
-  <script type="module" src="firebase-init.js?v=20"></script>
+  <script type="module" src="firebase-init.js?v=21"></script>
   <script type="module">
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
     import { doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
     import { auth, db } from "./firebase-init.js";
 
     const SUPER_ADMIN = "joseph@blueangelclinical.com";
-
-    // Mirror of the hardcoded list from auth-gate.js — shown in the UI so
-    // Joseph can see what he can't remove.
-    const HARDCODED = {
-      emails: ["amy@amydanihermd.com", "doctor@sujanskymd.com"],
-      domains: ["blueangelclinical.com"],
-    };
+    const PRACTICE_LABELS = { sujansky: "Sujansky", daniher: "Daniher", staff: "Staff view" };
 
     const loadingEl        = document.getElementById("admin-loading");
     const deniedEl         = document.getElementById("admin-denied");
     const deniedEmailEl    = document.getElementById("admin-denied-email");
     const appEl            = document.getElementById("admin-app");
     const currentEmailEl   = document.getElementById("admin-current-email");
-    const hardcodedListEl  = document.getElementById("admin-hardcoded-list");
-    const dynamicListEl    = document.getElementById("admin-dynamic-list");
+    const usersListEl      = document.getElementById("admin-users-list");
     const addFormEl        = document.getElementById("admin-add-form");
-    const addKindEl        = document.getElementById("admin-add-kind");
     const addInputEl       = document.getElementById("admin-add-input");
+    const addAccessBoxes   = document.querySelectorAll("#admin-add-access input[type=checkbox]");
     const statusEl         = document.getElementById("admin-status");
     const errorEl          = document.getElementById("admin-error");
     const signoutBtn       = document.getElementById("admin-signout-btn");
-
-    function renderHardcoded() {
-      const items = [
-        ...HARDCODED.emails.map(e => ({ kind: "email", value: e })),
-        ...HARDCODED.domains.map(d => ({ kind: "domain", value: `*@${d}` })),
-      ];
-      hardcodedListEl.innerHTML = items
-        .map(item => `<li><span class="admin-list-badge">${item.kind}</span> ${item.value}</li>`)
-        .join("");
-    }
-
-    function renderDynamic(list) {
-      const items = [
-        ...(list.emails || []).map(e => ({ kind: "email", value: e })),
-        ...(list.domains || []).map(d => ({ kind: "domain", value: d, displayValue: `*@${d}` })),
-      ];
-      if (!items.length) {
-        dynamicListEl.innerHTML = `<li class="admin-list-empty">No managed users yet. Add one below.</li>`;
-        return;
-      }
-      dynamicListEl.innerHTML = items.map(item => `
-        <li>
-          <span class="admin-list-badge">${item.kind}</span>
-          <span class="admin-list-value">${item.displayValue || item.value}</span>
-          <button type="button" class="admin-list-remove" data-kind="${item.kind}" data-value="${item.value}" aria-label="Remove ${item.value}">Remove</button>
-        </li>
-      `).join("");
-
-      dynamicListEl.querySelectorAll(".admin-list-remove").forEach(btn => {
-        btn.addEventListener("click", () => removeEntry(btn.dataset.kind, btn.dataset.value));
-      });
-    }
 
     function showStatus(text) {
       errorEl.style.display = "none";
@@ -151,69 +116,125 @@
 
     async function readAllowlist() {
       const snap = await getDoc(doc(db, "admin", "allowlist"));
-      return snap.exists() ? snap.data() : { emails: [], domains: [] };
+      if (!snap.exists()) return { emails: {} };
+      const data = snap.data() || {};
+      return { emails: data.emails || {} };
     }
 
     async function writeAllowlist(next) {
-      await setDoc(doc(db, "admin", "allowlist"), {
-        emails: [...new Set((next.emails || []).map(e => e.toLowerCase()))].sort(),
-        domains: [...new Set((next.domains || []).map(d => d.toLowerCase()))].sort(),
-      });
+      // Normalize: lower-case keys, drop empty entries.
+      const cleaned = {};
+      for (const [rawEmail, entry] of Object.entries(next.emails || {})) {
+        const email = rawEmail.trim().toLowerCase();
+        if (!email) continue;
+        const access = Array.isArray(entry?.access) ? entry.access.filter(p => PRACTICE_LABELS[p]) : [];
+        if (!access.length) continue;
+        cleaned[email] = { access };
+      }
+      await setDoc(doc(db, "admin", "allowlist"), { emails: cleaned });
     }
 
-    async function addEntry(kind, rawValue) {
-      const value = rawValue.trim().toLowerCase();
-      if (!value) return;
+    function getSelectedAccess() {
+      return [...addAccessBoxes].filter(cb => cb.checked).map(cb => cb.value);
+    }
 
-      if (kind === "email" && !value.includes("@")) {
-        showError("That doesn't look like a valid email address.");
+    async function addUser(email, access) {
+      const lower = email.trim().toLowerCase();
+      if (!lower || !lower.includes("@")) {
+        showError("Enter a valid email address.");
         return;
       }
-      if (kind === "domain" && (value.includes("@") || !value.includes("."))) {
-        showError("Enter a bare domain like example.com (no @).");
+      if (!access.length) {
+        showError("Pick at least one practice for this user.");
         return;
       }
-
-      // Prevent duplicates against the hardcoded list too
-      if (kind === "email" && HARDCODED.emails.map(e => e.toLowerCase()).includes(value)) {
-        showError(`${value} is already a system user (permanent access).`);
-        return;
-      }
-      if (kind === "domain" && HARDCODED.domains.map(d => d.toLowerCase()).includes(value)) {
-        showError(`${value} is already a system domain (permanent access).`);
-        return;
-      }
-
       try {
         const current = await readAllowlist();
-        const field = kind === "email" ? "emails" : "domains";
-        const nextList = [...(current[field] || []), value];
-        await writeAllowlist({ ...current, [field]: nextList });
+        current.emails[lower] = { access };
+        await writeAllowlist(current);
         addInputEl.value = "";
-        showStatus(`Added ${value}.`);
+        addAccessBoxes.forEach(cb => (cb.checked = false));
+        showStatus(`Added ${lower}.`);
       } catch (err) {
         console.error("Add failed:", err);
-        showError(`Could not add: ${err?.message || err}`);
+        showError(`Could not add user: ${err?.message || err}`);
       }
     }
 
-    async function removeEntry(kind, value) {
-      if (!confirm(`Remove ${value} from the allowlist? They will lose access immediately.`)) return;
+    async function updateAccess(email, access) {
       try {
         const current = await readAllowlist();
-        const field = kind === "email" ? "emails" : "domains";
-        const nextList = (current[field] || []).filter(v => v.toLowerCase() !== value.toLowerCase());
-        await writeAllowlist({ ...current, [field]: nextList });
-        showStatus(`Removed ${value}.`);
+        if (!access.length) {
+          // Removing the last practice is equivalent to removing the user.
+          delete current.emails[email];
+        } else {
+          current.emails[email] = { access };
+        }
+        await writeAllowlist(current);
+        showStatus(access.length ? `Updated access for ${email}.` : `Removed ${email}.`);
+      } catch (err) {
+        console.error("Update failed:", err);
+        showError(`Could not update: ${err?.message || err}`);
+      }
+    }
+
+    async function removeUser(email) {
+      if (!confirm(`Remove ${email} from the allowlist? They will lose access immediately.`)) return;
+      try {
+        const current = await readAllowlist();
+        delete current.emails[email];
+        await writeAllowlist(current);
+        showStatus(`Removed ${email}.`);
       } catch (err) {
         console.error("Remove failed:", err);
         showError(`Could not remove: ${err?.message || err}`);
       }
     }
 
+    function renderUsers(list) {
+      const entries = Object.entries(list || {}).sort(([a], [b]) => a.localeCompare(b));
+      if (!entries.length) {
+        usersListEl.innerHTML = `<li class="admin-list-empty">No managed users yet. Add someone above.</li>`;
+        return;
+      }
+      usersListEl.innerHTML = entries.map(([email, entry]) => {
+        const access = new Set((entry?.access) || []);
+        const boxes = Object.entries(PRACTICE_LABELS).map(([pid, label]) => `
+          <label class="admin-check">
+            <input type="checkbox" data-user="${email}" data-practice="${pid}" ${access.has(pid) ? "checked" : ""} />
+            ${label}
+          </label>
+        `).join("");
+        return `
+          <li class="admin-user-row">
+            <div class="admin-user-email">${email}</div>
+            <div class="admin-access-checkboxes admin-access-inline">${boxes}</div>
+            <button type="button" class="admin-list-remove" data-remove="${email}">Remove</button>
+          </li>
+        `;
+      }).join("");
+
+      // Wire toggles
+      usersListEl.querySelectorAll('input[data-user]').forEach(cb => {
+        cb.addEventListener("change", async () => {
+          const email = cb.dataset.user;
+          const row   = cb.closest(".admin-user-row");
+          const selected = [...row.querySelectorAll('input[data-user]')]
+            .filter(el => el.checked)
+            .map(el => el.dataset.practice);
+          await updateAccess(email, selected);
+        });
+      });
+
+      // Wire remove buttons
+      usersListEl.querySelectorAll("[data-remove]").forEach(btn => {
+        btn.addEventListener("click", () => removeUser(btn.dataset.remove));
+      });
+    }
+
     addFormEl.addEventListener("submit", (e) => {
       e.preventDefault();
-      addEntry(addKindEl.value, addInputEl.value);
+      addUser(addInputEl.value, getSelectedAccess());
     });
 
     signoutBtn.addEventListener("click", async () => {
@@ -223,11 +244,9 @@
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        // Not signed in — bounce to workflow's sign-in page, then come back.
         window.location.href = `./#admin`;
         return;
       }
-
       const email = (user.email || "").toLowerCase();
       if (email !== SUPER_ADMIN) {
         loadingEl.style.display = "none";
@@ -235,15 +254,13 @@
         deniedEmailEl.textContent = `Signed in as ${email}.`;
         return;
       }
-
       loadingEl.style.display = "none";
       appEl.style.display = "block";
       currentEmailEl.textContent = email;
-      renderHardcoded();
 
-      // Live-render the dynamic list.
       onSnapshot(doc(db, "admin", "allowlist"), (snap) => {
-        renderDynamic(snap.exists() ? snap.data() : { emails: [], domains: [] });
+        const data = snap.exists() ? snap.data() : {};
+        renderUsers(data.emails || {});
       }, (err) => {
         console.error("allowlist snapshot error:", err);
         showError(`Could not load allowlist: ${err?.message || err}`);

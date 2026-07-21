@@ -18,11 +18,11 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase
 import { auth, db } from "./firebase-init.js";
 
 // ── Allowlist ────────────────────────────────────────────────────
+// Hardcoded fallback so the Blue Angel team can never accidentally
+// lose access. Everyone else is managed via /admin.html.
 const ALLOWED_DOMAINS = ["blueangelclinical.com"];
-const ALLOWED_EMAILS  = [
-  "amy@amydanihermd.com",
-  "doctor@sujanskymd.com",
-];
+const ALLOWED_EMAILS  = [];
+const ALL_PRACTICES   = ["sujansky", "daniher", "staff"];
 
 function checkHardcoded(email) {
   if (!email) return false;
@@ -38,43 +38,49 @@ async function fetchDynamicAllowlist() {
   if (dynamicAllowlistCache) return dynamicAllowlistCache;
   try {
     const snap = await getDoc(doc(db, "admin", "allowlist"));
-    if (snap.exists()) {
-      const data = snap.data();
-      dynamicAllowlistCache = {
-        emails:  (data.emails  || []).map(e => e.toLowerCase()),
-        domains: (data.domains || []).map(d => d.toLowerCase()),
-      };
-    } else {
-      dynamicAllowlistCache = { emails: [], domains: [] };
-    }
+    dynamicAllowlistCache = snap.exists() ? (snap.data() || {}) : {};
+    dynamicAllowlistCache.emails = dynamicAllowlistCache.emails || {};
   } catch (err) {
     console.warn("Could not fetch dynamic allowlist:", err);
-    dynamicAllowlistCache = { emails: [], domains: [] };
+    dynamicAllowlistCache = { emails: {} };
   }
   return dynamicAllowlistCache;
 }
 
-async function isAllowed(email) {
-  if (!email) return false;
-  if (checkHardcoded(email)) return true;
+// Returns the array of practice ids this user can access:
+// ["sujansky"], ["daniher","staff"], etc. Empty array = no access.
+async function resolveAccess(email) {
+  if (!email) return [];
   const lower = email.toLowerCase();
-  const domain = lower.split("@")[1];
+
+  // Hardcoded users get full access as a safety net.
+  if (checkHardcoded(lower)) return [...ALL_PRACTICES];
+
+  // Managed users get exactly the practices configured for them.
   const dyn = await fetchDynamicAllowlist();
-  return dyn.emails.includes(lower) || dyn.domains.includes(domain);
+  const entry = dyn.emails?.[lower];
+  if (entry && Array.isArray(entry.access)) {
+    return entry.access.filter(p => ALL_PRACTICES.includes(p));
+  }
+
+  return [];
+}
+
+async function isAllowed(email) {
+  const access = await resolveAccess(email);
+  return access.length > 0;
 }
 
 // Email-link sign-in is intentionally stricter than the general allowlist:
-// only exact-match emails (not the domain wildcard) can request a magic link.
-// Blue Angel Workspace users have Google accounts, so they should use the
-// Google button. This prevents someone from typing any @blueangelclinical.com
+// only explicitly-listed emails (not the hardcoded domain) can request a
+// magic link. This prevents someone from typing any @blueangelclinical.com
 // address and having a link mailed to whoever owns that alias.
 async function isAllowedForEmailLink(email) {
   if (!email) return false;
   const lower = email.toLowerCase();
   if (ALLOWED_EMAILS.map(e => e.toLowerCase()).includes(lower)) return true;
-  // Also allow any specific email added via the admin page (but not domains).
   const dyn = await fetchDynamicAllowlist();
-  return dyn.emails.includes(lower);
+  return !!dyn.emails?.[lower];
 }
 
 const EMAIL_STORAGE_KEY = "authEmailForLink";
@@ -233,14 +239,20 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const email = (user.email || "").toLowerCase();
+  const access = await resolveAccess(email);
 
-  if (!(await isAllowed(email))) {
+  if (!access.length) {
     pendingDenialMessage = `${email} is not authorized to access this workflow. Contact the office administrator to be added.`;
     try { await signOut(auth); } catch {}
     return;
   }
 
-  window.__authUser = { email, uid: user.uid, displayName: user.displayName || "" };
+  window.__authUser = {
+    email,
+    uid: user.uid,
+    displayName: user.displayName || "",
+    access,
+  };
   showApp(email);
-  window.dispatchEvent(new CustomEvent("app-authorized", { detail: { email, uid: user.uid } }));
+  window.dispatchEvent(new CustomEvent("app-authorized", { detail: { email, uid: user.uid, access } }));
 });

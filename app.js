@@ -661,8 +661,19 @@ window.addEventListener("focus", () => {
 // ═══════════════════════════════════════════════════════════════════
 
 function renderPracticePicker() {
-  const sources = Object.values(window.__workflowDataSources || {});
+  const access  = window.__authUser?.access;
+  const allowed = Array.isArray(access) && access.length
+    ? new Set(access)
+    : null; // null = no filter (safety fallback)
+  const sources = Object.values(window.__workflowDataSources || {})
+    .filter(src => !allowed || allowed.has(src.id));
   const cards   = document.getElementById("picker-cards");
+
+  if (!sources.length) {
+    cards.innerHTML = `<div class="no-patients">You don't have access to any practice views. Contact the office administrator.</div>`;
+    return;
+  }
+
   cards.innerHTML = sources.map(src => `
     <button class="picker-card" type="button" data-practice-id="${src.id}">
       ${src.displayName || src.label}
@@ -675,6 +686,11 @@ function renderPracticePicker() {
 }
 
 function selectPractice(id) {
+  const access = window.__authUser?.access;
+  if (Array.isArray(access) && access.length && !access.includes(id)) {
+    console.warn(`Blocked attempt to open ${id} without permission.`);
+    return;
+  }
   activePractice       = window.__workflowDataSources[id];
   patients             = [];
   expandedId           = null;
