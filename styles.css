@@ -1007,6 +1007,34 @@ body {
   font-size: 0.88rem;
 }
 
+.checklist-role {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 10px;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+
+.checklist-role-doctor {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.checklist-role-staff {
+  background: #d97706;
+  color: #fff;
+}
+
+.checklist-item.completed .checklist-role {
+  opacity: 0.55;
+  text-decoration: none;
+}
+
 .checklist-note {
   display: block;
   margin-top: 3px;

@@ -4,18 +4,26 @@
 
 const CHECKLIST = [
   {
-    html: `Enter patient in <a class="checklist-link" href="https://travelcare.com/" target="_blank" rel="noopener noreferrer">TravelCare</a> and generate report`,
+    html: `Enter Patient into <a class="checklist-link" href="https://travelcare.com/" target="_blank" rel="noopener noreferrer">Travel Care</a>, Generate report, and Determine recommended vaccines`,
+    role: "Doctor",
   },
-  { text: "Determine and order recommended vaccines" },
-  { text: "Schedule patient appointment for pre-travel consultation and vaccine administration",
-    notes: ["Calculate vaccine costs and confirm with patient", "Schedule once vaccines have arrived"] },
-  { text: "Write and order prescriptions" },
+  {
+    text: "Schedule patient appointment for pre-travel consultation and vaccine administration",
+    notes: [
+      "Calculate vaccine costs and confirm with patient",
+      "Collect patient's preferred pharmacy for prescription pickup",
+      "Schedule once vaccines have arrived",
+    ],
+    role: "Staff",
+  },
+  { text: "Order recommended vaccines after receiving patient approval", role: "Staff" },
+  { text: "Write and order prescriptions", role: "Doctor" },
   {
     html: `Assemble <a class="checklist-link" href="travel_kit.html" target="_blank" rel="noopener noreferrer">travel kit</a>`,
+    role: "Staff",
   },
-  { text: "Conduct patient appointment, administer vaccines, assign prescriptions, and provide the travel kit" },
-  { text: "Schedule any follow-ups if necessary" },
-  { text: "Mark patient cleared for travel" },
+  { text: "Conduct patient appointment, administer vaccines, assign prescriptions, and provide the travel kit", role: "Doctor" },
+  { text: "Mark patient cleared for travel", role: "Doctor" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -463,11 +471,14 @@ function renderPatients() {
     <div class="checklist">
       ${CHECKLIST.map((task, i) => {
         const checked = isTaskChecked(p, i, state);
+        const roleBadge = task.role
+          ? `<span class="checklist-role checklist-role-${task.role.toLowerCase()}">${task.role}</span>`
+          : "";
         return `
         <label class="checklist-item${checked ? " completed" : ""}">
           <input type="checkbox" data-patient-id="${p.id}" data-task-index="${i}" ${checked ? "checked" : ""} />
           <span class="checklist-item-text">
-            ${renderChecklistTask(task, i, p)}
+            ${roleBadge}${renderChecklistTask(task, i, p)}
             ${(task.notes ?? (task.note ? [task.note] : [])).map(n => `<span class="checklist-note">⚠ ${n}</span>`).join("")}
           </span>
         </label>`;
@@ -935,7 +946,7 @@ function addLocationRow() {
   row.innerHTML = `
     <div class="cp-field">
       <label>Country <span class="cp-req">*</span></label>
-      <input type="text" name="country" required autocomplete="off" />
+      <input type="text" name="country" list="country-list" required autocomplete="off" placeholder="Start typing to search…" />
     </div>
     <div class="cp-field">
       <label>City / Region</label>
