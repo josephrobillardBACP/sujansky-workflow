@@ -1084,8 +1084,23 @@ body {
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-.checklist-item.completed .checklist-fields {
-  opacity: 0.6;
+/* Keep the input fields fully readable and editable even after the task
+   is checked off — the staff often refers back to them post-completion. */
+.checklist-item.completed .checklist-fields,
+.checklist-item.completed .checklist-field,
+.checklist-item.completed .checklist-field-label,
+.checklist-item.completed .checklist-field-input {
+  opacity: 1;
+  text-decoration: none;
+  color: initial;
+}
+
+.checklist-item.completed .checklist-field-label {
+  color: var(--muted);
+}
+
+.checklist-item.completed .checklist-field-input {
+  color: var(--text);
 }
 
 .checklist-note {
