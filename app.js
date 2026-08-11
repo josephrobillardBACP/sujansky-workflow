@@ -11,18 +11,18 @@ const CHECKLIST = [
     text: "Schedule patient appointment for pre-travel consultation and vaccine administration",
     notes: [
       "Calculate vaccine costs and confirm with patient",
-      "Collect patient's preferred pharmacy for prescription pickup",
       "Schedule once vaccines have arrived",
+    ],
+    fields: [
+      { key: "appointmentDate", label: "Appointment date", type: "date", required: true },
+      { key: "pharmacy",        label: "Patient's preferred pharmacy", type: "text", required: true, placeholder: "e.g. CVS on Main St." },
     ],
     role: "Staff",
   },
   { text: "Order recommended vaccines after receiving patient approval", role: "Staff" },
-  { text: "Write and order prescriptions", role: "Doctor" },
-  {
-    html: `Assemble <a class="checklist-link" href="travel_kit.html" target="_blank" rel="noopener noreferrer">travel kit</a>`,
-    role: "Staff",
-  },
+  { travelKit: true, role: "Staff" },
   { text: "Conduct patient appointment, administer vaccines, assign prescriptions, and provide the travel kit", role: "Doctor" },
+  { text: "Write and order prescriptions", role: "Doctor" },
   { text: "Mark patient cleared for travel", role: "Doctor" },
 ];
 
@@ -193,14 +193,34 @@ function renderTravelKitApproval(patient) {
 }
 
 function renderChecklistTask(task, index, patient) {
-  if (index === 4) {
+  if (task.travelKit) {
     return `<span class="checklist-inline">Assemble <a class="checklist-link" href="${buildTravelKitUrl(patient)}" target="_blank" rel="noopener noreferrer">travel kit</a> ${renderTravelKitApproval(patient)}</span>`;
   }
   return task.html ?? task.text;
 }
 
+// State value for a task can be either a boolean OR an object like
+// { done: true, appointmentDate: "...", pharmacy: "..." } for tasks
+// that capture extra fields. Both shapes coexist across the app.
+function readTaskState(patient, taskIndex, state) {
+  const val = (state[patient.id] || {})[taskIndex];
+  if (val && typeof val === "object") return val;
+  return { done: !!val };
+}
+
 function isTaskChecked(patient, taskIndex, state) {
-  return !!(state[patient.id] || {})[taskIndex];
+  return !!readTaskState(patient, taskIndex, state).done;
+}
+
+function getTaskField(patient, taskIndex, fieldKey, state) {
+  return readTaskState(patient, taskIndex, state)[fieldKey] || "";
+}
+
+function taskHasAllRequiredFields(patient, taskIndex, state) {
+  const task = CHECKLIST[taskIndex];
+  if (!task?.fields?.length) return true;
+  const current = readTaskState(patient, taskIndex, state);
+  return task.fields.every(f => !f.required || String(current[f.key] || "").trim());
 }
 
 function getProgress(patientId, state) {
@@ -474,12 +494,25 @@ function renderPatients() {
         const roleBadge = task.role
           ? `<span class="checklist-role checklist-role-${task.role.toLowerCase()}">${task.role}</span>`
           : "";
+        const notesHtml = (task.notes ?? (task.note ? [task.note] : []))
+          .map(n => `<span class="checklist-note">⚠ ${n}</span>`).join("");
+        const fieldsHtml = (task.fields || []).map(f => {
+          const val = getTaskField(p, i, f.key, state);
+          const attrs = `data-patient-id="${p.id}" data-task-index="${i}" data-field-key="${f.key}"`;
+          const placeholder = f.placeholder ? ` placeholder="${escapeHtml(f.placeholder)}"` : "";
+          return `
+            <div class="checklist-field">
+              <label class="checklist-field-label" for="cf-${p.id}-${i}-${f.key}">${f.label}${f.required ? ' <span class="checklist-field-req">*</span>' : ""}</label>
+              <input id="cf-${p.id}-${i}-${f.key}" class="checklist-field-input" type="${f.type}" value="${escapeHtml(val)}"${placeholder} ${attrs} />
+            </div>`;
+        }).join("");
         return `
         <label class="checklist-item${checked ? " completed" : ""}">
           <input type="checkbox" data-patient-id="${p.id}" data-task-index="${i}" ${checked ? "checked" : ""} />
           <span class="checklist-item-text">
             ${roleBadge}${renderChecklistTask(task, i, p)}
-            ${(task.notes ?? (task.note ? [task.note] : [])).map(n => `<span class="checklist-note">⚠ ${n}</span>`).join("")}
+            ${notesHtml}
+            ${fieldsHtml ? `<div class="checklist-fields">${fieldsHtml}</div>` : ""}
           </span>
         </label>`;
       }).join("")}
@@ -589,16 +622,57 @@ function attachEvents() {
     cb.addEventListener("change", () => {
       const patientId = cb.dataset.patientId;
       const taskIndex = Number(cb.dataset.taskIndex);
+      const task      = CHECKLIST[taskIndex];
       const state     = loadState();
+      const patient   = { id: patientId };
+
+      // If the user is checking a task with required fields, verify they're filled.
+      if (cb.checked && task?.fields?.length && !taskHasAllRequiredFields(patient, taskIndex, state)) {
+        cb.checked = false;
+        const missing = task.fields
+          .filter(f => f.required && !String(readTaskState(patient, taskIndex, state)[f.key] || "").trim())
+          .map(f => f.label);
+        alert(`Please fill in the following field(s) before checking off this task:\n\n• ${missing.join("\n• ")}`);
+        return;
+      }
 
       if (!state[patientId]) state[patientId] = {};
-      state[patientId][taskIndex] = cb.checked;
+      // Preserve any captured field values when toggling done state.
+      const existing = state[patientId][taskIndex];
+      if (existing && typeof existing === "object") {
+        state[patientId][taskIndex] = { ...existing, done: cb.checked };
+      } else {
+        state[patientId][taskIndex] = cb.checked;
+      }
       saveState(state);
 
       cb.closest(".checklist-item").classList.toggle("completed", cb.checked);
       updatePatientProgress(patientId, state);
       renderStats();
     });
+  });
+
+  // Task-specific input fields (appointment date, pharmacy, etc.)
+  document.querySelectorAll(".checklist-field-input").forEach(input => {
+    // Stop clicks from bubbling to the wrapping <label>, which would
+    // otherwise toggle the checkbox when the user clicks the input.
+    input.addEventListener("click", e => e.stopPropagation());
+
+    const persist = () => {
+      const patientId = input.dataset.patientId;
+      const taskIndex = Number(input.dataset.taskIndex);
+      const fieldKey  = input.dataset.fieldKey;
+      const value     = input.value;
+      const state     = loadState();
+      if (!state[patientId]) state[patientId] = {};
+      const current = state[patientId][taskIndex];
+      const base = (current && typeof current === "object") ? current : { done: !!current };
+      state[patientId][taskIndex] = { ...base, [fieldKey]: value };
+      saveState(state);
+    };
+
+    input.addEventListener("change", persist);
+    input.addEventListener("blur", persist);
   });
 
   document.querySelectorAll(".checklist-link").forEach(link => {
